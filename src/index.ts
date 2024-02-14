@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config()
 
 import { App } from './app.ts';
+import connection from './database.ts'
 
 const app = new App()
 
