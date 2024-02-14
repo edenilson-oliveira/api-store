@@ -9,8 +9,8 @@ export class App{
   }
   
   private middleware(){
-    //this.server.use(express.json())
+    this.server.use(express.json())
   }
 }
 
-//export default App
+export default App
