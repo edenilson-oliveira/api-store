@@ -1,5 +1,5 @@
 import express from 'express';
-import router from './routes/login.ts'
+import router from './routes/login'
 
 export class App{
   public server: express.Application;
