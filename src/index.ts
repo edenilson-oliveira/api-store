@@ -1,10 +1,8 @@
 import 'dotenv/config';
 
 import { App } from './app';
-import connect from './database/models/index'
+import connect from './database/models/index';
 
-console.log(connect)
-//import connection from './connect';
 const app = new App()
 
 app.server.listen(process.env.PORT, () => {
