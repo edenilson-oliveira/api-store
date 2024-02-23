@@ -49,7 +49,6 @@ User.init({
 },{
   sequelize: db,
   tableName: 'users',
-  underscored: true,
   timestamps: true,
 })
 
