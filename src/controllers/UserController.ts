@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 import User from '../database/models/user';
+import validator from '../utils/validator'
 
 class UserController{
   
@@ -26,13 +27,13 @@ class UserController{
       }
     }
   
-  public getUsers = async (req: Request,res: Response,next: NextFunction) => {
+  public getUser = async (req: Request,res: Response,next: NextFunction) => {
     
     this.verifyToken(req,res,next)
    
     try{
       const user = await User.findAll({})
-      res.json(user).status(200)
+      res.status(200).json(user)
     }
     
     catch{
@@ -46,28 +47,33 @@ class UserController{
     return users.some((value:User): boolean => value.dataValues.email === email)
   }
   
-  public createUser = async (req: Request,res: Response,next:NextFunction) => {
+  public createUser = async (req: Request,res: Response) => {
     try{
-      
       const hashPassword = await bcrypt.hash(req.body.password,10)
       
       const user = {
         firstName: req.body.firstName,lastName: req.body.lastName,email: req.body.email, password: hashPassword
       }
+      const validate = validator.execute(req,res)
       
       const emailVerificationOnDatabase = await this.emailAlreadyThere(user.email)
       
-      if(!emailVerificationOnDatabase){
+      if(validate.isValidate && !emailVerificationOnDatabase){
         
         const userCreated = await User.create(user)
         
         const token = jwt.sign({id: userCreated.dataValues.id},process.env.SECRET_KEY as string, {expiresIn: '1h'})
         
-        res.json({token}).status(200)
+        res.status(200).json({token})
+      }
+      
+      
+      else if(emailVerificationOnDatabase){
+        res.status(409).json({message: 'Email Already Exists'})
       }
       
       else{
-        res.status(403).json({message: "Email or password are invalid"})
+        res.status(400).json({message: validate.message})
       }
     }
     
