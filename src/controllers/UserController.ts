@@ -40,10 +40,20 @@ class UserController{
     
   }
   
+<<<<<<< HEAD
 
   public signUp = async (req: Request,res: Response) => {
     try{
       
+=======
+  private async emailAlreadyThere(email: string): Promise<boolean> {
+    const users = await User.findAll({})
+    return users.some((value:User): boolean => value.dataValues.email === email)
+  }
+  
+  public createUser = async (req: Request,res: Response) => {
+    try{
+>>>>>>> refs/remotes/origin/main/main
       const hashPassword = await bcrypt.hash(req.body.password,10)
       
       const user = {
