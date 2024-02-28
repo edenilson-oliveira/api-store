@@ -1,6 +1,7 @@
 import { Options } from 'sequelize';
-import dotenv from 'dotenv' ;
-import path from 'path'
+
+const dotenv = require('dotenv')
+const path = require('path')
 
 dotenv.config({path: path.resolve(__dirname, '../../../.env')})
 

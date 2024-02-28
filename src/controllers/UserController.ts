@@ -25,12 +25,17 @@ class UserController{
     }
   }
   
-  public getUser = async (req: Request,res: Response,next: NextFunction) => {
+  public getUser = async (req: Request,res: Response) => {
     
-    new VerifyToken().execute(req,res,next)
-   
+    const veirifyToken = new VerifyToken().execute(req,res)
+    const id = veirifyToken.userId
+    
     try{
-      const user = await User.findAll({})
+      const user = await User.findAll({
+        where:{
+          id
+        } 
+      })
       res.status(200).json(user)
     }
     
@@ -39,21 +44,9 @@ class UserController{
     }
     
   }
-  
-<<<<<<< HEAD
 
   public signUp = async (req: Request,res: Response) => {
     try{
-      
-=======
-  private async emailAlreadyThere(email: string): Promise<boolean> {
-    const users = await User.findAll({})
-    return users.some((value:User): boolean => value.dataValues.email === email)
-  }
-  
-  public createUser = async (req: Request,res: Response) => {
-    try{
->>>>>>> refs/remotes/origin/main/main
       const hashPassword = await bcrypt.hash(req.body.password,10)
       
       const user = {
