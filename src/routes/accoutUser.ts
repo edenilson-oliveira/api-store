@@ -3,7 +3,7 @@ import userController from '../controllers/UserController';
 
 const router = express.Router()
 
-router.post('/users/sign-up/',userController.signUp)
-router.post('/users/login/',userController.login)
+router.get('/users/account',userController.getUser)
+router.delete('/users/account',userController.deleteAccount)
 
 export default router

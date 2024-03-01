@@ -24,26 +24,6 @@ class UserController{
       )
     }
   }
-  
-  public getUser = async (req: Request,res: Response) => {
-    
-    const veirifyToken = new VerifyToken().execute(req,res)
-    const id = veirifyToken.userId
-    
-    try{
-      const user = await User.findAll({
-        where:{
-          id
-        } 
-      })
-      res.status(200).json(user)
-    }
-    
-    catch{
-      res.status(501)
-    }
-    
-  }
 
   public signUp = async (req: Request,res: Response) => {
     try{
@@ -101,6 +81,45 @@ class UserController{
     
     else{
       res.status(403).end()
+    }
+    
+  }
+  
+  public getUser = async (req: Request,res: Response) => {
+    
+    const veirifyToken = new VerifyToken().execute(req,res)
+    const id = veirifyToken.userId
+    
+    try{
+      const user = await User.findAll({
+        where:{
+          id
+        } 
+      })
+      res.status(200).json(user)
+    }
+    
+    catch{
+      res.status(501)
+    }
+  }
+  
+  public deleteAccount = async (req: Request,res: Response) => {
+    
+    const veirifyToken = new VerifyToken().execute(req,res)
+    const id = veirifyToken.userId
+    
+    try{
+      const user = await User.destroy({
+        where:{
+          id
+        } 
+      })
+      res.status(201).end()
+    }
+    
+    catch{
+      res.status(501)
     }
     
   }
