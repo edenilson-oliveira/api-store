@@ -27,17 +27,22 @@ class UserController{
 
   public signUp = async (req: Request,res: Response) => {
     try{
-      const hashPassword = await bcrypt.hash(req.body.password,10)
+      
+      const {firstName,lastName,email,password} = req.body
+      
+      const hashPassword = await bcrypt.hash(password,10)
       
       const user = {
-        firstName: req.body.firstName,lastName: req.body.lastName,email: req.body.email, password: hashPassword
+        firstName,
+        lastName,
+        email,
+        password: hashPassword
       }
       const validate = validator.execute(req.body)
       
       const emailVerificationOnDatabase = await this.emailAlreadyThere(user.email)
       
       if(validate.isValidate && !emailVerificationOnDatabase.emailExists){
-        
         const userCreated = await User.create(user)
         
         const token = generateTokenUser.execute(userCreated.dataValues.id)
@@ -70,7 +75,7 @@ class UserController{
         const userData = emailVerification.user
         const user = userData[0].dataValues
         const passwordValidate = await bcrypt.compare(password,user.password)
-        console.log(passwordValidate)
+        
         if(passwordValidate){
           const token = generateTokenUser.execute(user.id)
           
@@ -134,7 +139,7 @@ class UserController{
     
   }
   
-  public async editAccount(req: Request,res: Response,next: NextFunction){
+  public editAccount = async (req: Request,res: Response,next: NextFunction) => {
    
     
     try{
@@ -151,25 +156,36 @@ class UserController{
         const userInfo = userFromDb[0].dataValues
         const {firstName,lastName,email,password} = req.body
         
-        const user= {
+        const hashPassword = await bcrypt.hash(password,10)
+        
+        const user = {
           firstName: firstName ? firstName: userInfo.firstName,
           lastName: lastName ? lastName: userInfo.lastName,
           email: email ? email: userInfo.email,
-           password: password ? password: userInfo.password
+           password: password.length > 7? hashPassword: userInfo.password
         }
-        console.log(user)
+        
+        console.log(password,user)
+        const emailVerification = await this.emailAlreadyThere(email)
+      
         
         const validate = validator.execute(user)
         
-        if(validate.isValidate){
-          console.log('teste')
-          const user = await User.update(req.body,{
+        if(validate.isValidate && !emailVerification.emailExists){
+          
+          await User.update(user,{
             where: {
               id
             }
           })
           
-          res.status(200).json(user)
+          res.status(200).end()
+        }
+        else if(!validate.isValidate){
+          res.status(400).json({message: validate.message})
+        }
+        else{
+          res.status(400).json({message: 'Email already exists'})
         }
       }
     }
