@@ -32,7 +32,7 @@ class UserController{
       const user = {
         firstName: req.body.firstName,lastName: req.body.lastName,email: req.body.email, password: hashPassword
       }
-      const validate = validator.execute(req,res)
+      const validate = validator.execute(req.body)
       
       const emailVerificationOnDatabase = await this.emailAlreadyThere(user.email)
       
@@ -62,66 +62,121 @@ class UserController{
   }
   
   public login = async (req: Request,res: Response) => {
-    const { email, password } = req.body
-    const emailVerification = await this.emailAlreadyThere(email)
-    
-    if(emailVerification.emailExists){
-      const userData = emailVerification.user
-      const user = userData[0].dataValues
-      const passwordValidate = await bcrypt.compare(password,user.password)
-      if(passwordValidate){
-        const token = generateTokenUser.execute(user.id)
-        
-        res.json({token}).status(200)
+    try{
+      const { email, password } = req.body
+      const emailVerification = await this.emailAlreadyThere(email)
+      
+      if(emailVerification.emailExists){
+        const userData = emailVerification.user
+        const user = userData[0].dataValues
+        const passwordValidate = await bcrypt.compare(password,user.password)
+        console.log(passwordValidate)
+        if(passwordValidate){
+          const token = generateTokenUser.execute(user.id)
+          
+          res.json({token}).status(200)
+        }
+        else{
+          res.status(400).json({message: 'password is invalid'}).end()
+        }
       }
+      
       else{
-        res.status(400).json({message: 'password is invalid'}).end()
+        res.status(403).end()
+      }
+    }
+    catch{
+      res.status(501).json({message: 'Internal server error'})
+    }
+  }
+  
+  public getUser = async (req: Request,res: Response,next: NextFunction) => {
+    
+    try{
+      
+      const verifyToken = new VerifyToken().execute(req,res,next)
+      const id = verifyToken.userId
+      
+      if(verifyToken.auth){
+        const user = await User.findAll({
+          where:{
+            id
+          } 
+        })
+        res.status(200).json(user)
+      }
+    }
+    catch{
+      res.status(501).json({message: 'Internal server error'})
+    }
+  }
+  
+  public deleteAccount = async (req: Request,res: Response,next: NextFunction) => {
+    
+    try{
+      
+      const verifyToken = new VerifyToken().execute(req,res,next)
+      const id = verifyToken.userId
+      
+      if(verifyToken.auth){
+        const user = await User.destroy({
+          where:{
+            id
+          } 
+        })
+        res.status(201).end()
       }
     }
     
-    else{
-      res.status(403).end()
+    catch{
+      res.status(501).json({message: 'Internal server error'})
     }
     
   }
   
-  public getUser = async (req: Request,res: Response) => {
-    
-    const veirifyToken = new VerifyToken().execute(req,res)
-    const id = veirifyToken.userId
+  public async editAccount(req: Request,res: Response,next: NextFunction){
+   
     
     try{
-      const user = await User.findAll({
-        where:{
-          id
-        } 
-      })
-      res.status(200).json(user)
+      const verifyToken = new VerifyToken().execute(req,res,next)
+      const id = verifyToken.userId
+      if(verifyToken.auth){
+        
+        const userFromDb:User["dataValues"] = await User.findAll({
+            where: {
+              id
+            }
+          })
+          
+        const userInfo = userFromDb[0].dataValues
+        const {firstName,lastName,email,password} = req.body
+        
+        const user= {
+          firstName: firstName ? firstName: userInfo.firstName,
+          lastName: lastName ? lastName: userInfo.lastName,
+          email: email ? email: userInfo.email,
+           password: password ? password: userInfo.password
+        }
+        console.log(user)
+        
+        const validate = validator.execute(user)
+        
+        if(validate.isValidate){
+          console.log('teste')
+          const user = await User.update(req.body,{
+            where: {
+              id
+            }
+          })
+          
+          res.status(200).json(user)
+        }
+      }
     }
-    
-    catch{
-      res.status(501)
+    catch(err){
+      console.log(err)
+      res.status(501).json({message: 'Internal server error'})
     }
-  }
-  
-  public deleteAccount = async (req: Request,res: Response) => {
-    
-    const veirifyToken = new VerifyToken().execute(req,res)
-    const id = veirifyToken.userId
-    
-    try{
-      const user = await User.destroy({
-        where:{
-          id
-        } 
-      })
-      res.status(201).end()
-    }
-    
-    catch{
-      res.status(501)
-    }
-    
   }
 }
 

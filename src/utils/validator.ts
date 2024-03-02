@@ -5,12 +5,19 @@ interface Validate{
   message?: string;
 }
 
+interface UserInfo{
+  firstName: string,
+  lastName: string,
+  email: string,
+  password: string
+}
+
 class Validator{
-  public execute(req: Request,res: Response): Readonly<Validate>{
+  public execute(user: UserInfo): Readonly<Validate>{
     
-    const {firstName,lastName,email,password} = req.body
+    const {firstName,lastName,email,password} = user
     
-    const validateName = /^[A-Za-zÀ-ÖØ-öø-ÿ ']+$/
+    const validateName = /^[A-Za-zÀ-ÖØ-öø-ÿ ']{4,}$/
     const validateEmail = /^[a-z0-9]+@[a-z]+(\.[a-z]+){1,}$/
     
     try{

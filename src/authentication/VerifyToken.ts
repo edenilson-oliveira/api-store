@@ -13,7 +13,7 @@ interface TokenUser{
 }
 
 class VerifyToken{
-  public execute(req: Request,res: Response): Auth{
+  public execute(req: Request,res: Response, next: NextFunction): Auth{
       const bearerHeader = req.headers['authorization']
       if(bearerHeader){
         const token = bearerHeader.split('Bearer ')[1]
@@ -35,7 +35,7 @@ class VerifyToken{
         res.status(400).json({message:'Token not was provided'})
         return {auth: false}
       }
-    }
+  }
 }
 
 export default VerifyToken
