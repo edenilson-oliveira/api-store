@@ -8,22 +8,24 @@ import VerifyToken from '../authentication/VerifyToken';
 
 interface EmailVerify{
   emailExists: boolean;
-  user: User["dataValues"];
+  user: User["dataValues"]|boolean;
 }
 
 class UserController{
   
   private async emailAlreadyThere(email: string): Promise<EmailVerify> {
-    const users = await User.findAll({})
+    const userDb = await User.findAll({
+      where: {
+        email
+      }
+    })
+    
     return { 
-      emailExists: users.some((value:User): boolean => value.dataValues.email === email),
-      user: users.filter((value:User) =>{  if(value.dataValues.email === email){
-          return value.dataValues
-          }
-        }
-      )
-    }
+      emailExists: userDb.length > 0 ? true : false,
+      user: userDb.length ? userDb[0].dataValues: false
+      }
   }
+   
 
   public signUp = async (req: Request,res: Response) => {
     try{
@@ -41,7 +43,7 @@ class UserController{
       const validate = validator.execute(req.body)
       
       const emailVerificationOnDatabase = await this.emailAlreadyThere(user.email)
-      
+      console.log(emailVerificationOnDatabase)
       if(validate.isValidate && !emailVerificationOnDatabase.emailExists){
         const userCreated = await User.create(user)
         
@@ -61,7 +63,8 @@ class UserController{
       }
     }
     
-    catch{
+    catch(err){
+      console.log(err)
       res.status(501).json({message: 'Internal server error'})
     }
   }
@@ -72,8 +75,7 @@ class UserController{
       const emailVerification = await this.emailAlreadyThere(email)
       
       if(emailVerification.emailExists){
-        const userData = emailVerification.user
-        const user = userData[0].dataValues
+        const user = emailVerification.user
         const passwordValidate = await bcrypt.compare(password,user.password)
         
         if(passwordValidate){
