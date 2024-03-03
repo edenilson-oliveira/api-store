@@ -43,7 +43,7 @@ class UserController{
       const validate = validator.execute(req.body)
       
       const emailVerificationOnDatabase = await this.emailAlreadyThere(user.email)
-      console.log(emailVerificationOnDatabase)
+      
       if(validate.isValidate && !emailVerificationOnDatabase.emailExists){
         const userCreated = await User.create(user)
         
@@ -63,9 +63,8 @@ class UserController{
       }
     }
     
-    catch(err){
-      console.log(err)
-      res.status(501).json({message: 'Internal server error'})
+    catch{
+      res.status(500).json({message: 'Internal server error'})
     }
   }
   
@@ -89,11 +88,11 @@ class UserController{
       }
       
       else{
-        res.status(403).end()
+        res.status(404).end()
       }
     }
     catch{
-      res.status(501).json({message: 'Internal server error'})
+      res.status(500).json({message: 'Internal server error'})
     }
   }
   
@@ -114,7 +113,7 @@ class UserController{
       }
     }
     catch{
-      res.status(501).json({message: 'Internal server error'})
+      res.status(500).json({message: 'Internal server error'})
     }
   }
   
@@ -136,7 +135,7 @@ class UserController{
     }
     
     catch{
-      res.status(501).json({message: 'Internal server error'})
+      res.status(500).json({message: 'Internal server error'})
     }
     
   }
@@ -160,14 +159,25 @@ class UserController{
         
         const hashPassword = await bcrypt.hash(password,10)
         
+        let userPassword = ''
+        
+        if(password && password.length < 8){
+          userPassword = password
+        }
+        else if(!password){
+          userPassword = userInfo.password
+        }
+        else{
+          userPassword = hashPassword
+        }
+        
         const user = {
           firstName: firstName ? firstName: userInfo.firstName,
           lastName: lastName ? lastName: userInfo.lastName,
           email: email ? email: userInfo.email,
-           password: password.length > 7? hashPassword: userInfo.password
+           password: userPassword
         }
         
-        console.log(password,user)
         const emailVerification = await this.emailAlreadyThere(email)
       
         
@@ -193,7 +203,7 @@ class UserController{
     }
     catch(err){
       console.log(err)
-      res.status(501).json({message: 'Internal server error'})
+      res.status(500).json({message: 'Internal server error'})
     }
   }
 }
