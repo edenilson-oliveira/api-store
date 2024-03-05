@@ -5,7 +5,6 @@ import validator from '../utils/validator'
 import generateTokenUser from '../authentication/GenerateTokenUser';
 import VerifyToken from '../authentication/VerifyToken';
 
-
 interface EmailVerify{
   emailExists: boolean;
   user: User["dataValues"]|boolean;
@@ -45,6 +44,7 @@ class UserController{
       const emailVerificationOnDatabase = await this.emailAlreadyThere(user.email)
       
       if(validate.isValidate && !emailVerificationOnDatabase.emailExists){
+        
         const userCreated = await User.create(user)
         
         const token = generateTokenUser.execute(userCreated.dataValues.id)
