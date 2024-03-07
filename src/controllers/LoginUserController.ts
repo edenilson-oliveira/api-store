@@ -8,6 +8,7 @@ import generateTokenUser from '../authentication/GenerateTokenUser';
 import VerifyToken from '../authentication/VerifyToken';
 import SendMail from '../services/mail';
 import CodeGenerate from '../services/codeGenerate';
+import client from '../redisConfig'
 
 interface UserInfo{
   firstName: string;
@@ -19,7 +20,6 @@ interface UserInfo{
 class LoginUserControler{
   
   user: Partial<UserInfo>;
-  code: string | undefined;
   
   constructor(){
     this.user = {}
@@ -49,8 +49,12 @@ class LoginUserControler{
         const code = new CodeGenerate().execute()
         
         const sendMail = new SendMail(user.email,'Confirm Email', `Confirm your email with code ${code}`).execute()
+        
+        client.set('getCode', code)
+        
+        client.expire('getCode', 60)
+        
         this.user = user
-        this.code = code
         res.status(200).json({message: 'Confirm your email'})
       }
       
@@ -72,11 +76,13 @@ class LoginUserControler{
   
   public confirmEmail = async (req: Request,res: Response) => {
     try{
-      if(this.code && req.body.code === this.code){
+      const code = await client.get('getCode')
+      console.log(code)
+      if(code && req.body.code == code){
         const userCreated = await User.create(this.user)
           
         const token = generateTokenUser.execute(userCreated.dataValues.id)
-        this.code = ''
+        client.set('getCode','')
         res.status(200).json({token})
       }
       else{
