@@ -1,4 +1,4 @@
-import { Request,Response,NextFunction } from 'express';
+import { Request,Response } from 'express';
 import jwt from 'jsonwebtoken';
 import {JwtPayload } from 'jsonwebtoken'
 import 'dotenv/config';
@@ -13,7 +13,7 @@ interface TokenUser{
 }
 
 class VerifyToken{
-  public execute(req: Request,res: Response, next: NextFunction): Auth{
+  public execute(req: Request,res: Response): Auth{
       const bearerHeader = req.headers['authorization']
       if(bearerHeader){
         const token = bearerHeader.split('Bearer ')[1]

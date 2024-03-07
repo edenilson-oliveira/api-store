@@ -4,13 +4,29 @@ import User from '../database/models/user';
 import validator from '../utils/validator'
 import generateTokenUser from '../authentication/GenerateTokenUser';
 import VerifyToken from '../authentication/VerifyToken';
+import SendMail from '../services/mail';
+import CodeGenerate from '../services/codeGenerate';
 
 interface EmailVerify{
   emailExists: boolean;
   user: User["dataValues"]|boolean;
 }
 
+interface UserInfo{
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}
+
 class UserController{
+  
+  user: Partial<UserInfo>;
+  code: string | undefined;
+  
+  constructor(){
+    this.user = {}
+  }
   
   private async emailAlreadyThere(email: string): Promise<EmailVerify> {
     const userDb = await User.findAll({
@@ -24,7 +40,7 @@ class UserController{
       user: userDb.length ? userDb[0].dataValues: false
       }
   }
-   
+
 
   public signUp = async (req: Request,res: Response) => {
     try{
@@ -45,11 +61,12 @@ class UserController{
       
       if(validate.isValidate && !emailVerificationOnDatabase.emailExists){
         
-        const userCreated = await User.create(user)
+        const code = new CodeGenerate().execute()
         
-        const token = generateTokenUser.execute(userCreated.dataValues.id)
-        
-        res.status(200).json({token})
+        const sendMail = new SendMail(user.email,'Confirm Email', `Confirm your email with code ${code}`).execute()
+        this.user = user
+        this.code = code
+        res.status(200).json({message: 'Confirm your email'})
       }
       
       
@@ -63,6 +80,24 @@ class UserController{
       }
     }
     
+    catch{
+      res.status(500).json({message: 'Internal server error'})
+    }
+  }
+  
+  public confirmEmail = async (req: Request,res: Response) => {
+    try{
+      if(this.code && req.body.code === this.code){
+        const userCreated = await User.create(this.user)
+          
+        const token = generateTokenUser.execute(userCreated.dataValues.id)
+        this.code = ''
+        res.status(200).json({token})
+      }
+      else{
+        res.status(400).json({message: 'Code is invalid'})
+      }
+    }
     catch{
       res.status(500).json({message: 'Internal server error'})
     }
@@ -96,11 +131,11 @@ class UserController{
     }
   }
   
-  public getUser = async (req: Request,res: Response,next: NextFunction) => {
+  public getUser = async (req: Request,res: Response) => {
     
     try{
       
-      const verifyToken = new VerifyToken().execute(req,res,next)
+      const verifyToken = new VerifyToken().execute(req,res)
       const id = verifyToken.userId
       
       if(verifyToken.auth){
@@ -117,11 +152,11 @@ class UserController{
     }
   }
   
-  public deleteAccount = async (req: Request,res: Response,next: NextFunction) => {
+  public deleteAccount = async (req: Request,res: Response) => {
     
     try{
       
-      const verifyToken = new VerifyToken().execute(req,res,next)
+      const verifyToken = new VerifyToken().execute(req,res)
       const id = verifyToken.userId
       
       if(verifyToken.auth){
@@ -144,7 +179,7 @@ class UserController{
    
     
     try{
-      const verifyToken = new VerifyToken().execute(req,res,next)
+      const verifyToken = new VerifyToken().execute(req,res)
       const id = verifyToken.userId
       if(verifyToken.auth){
         
