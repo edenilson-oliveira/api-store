@@ -6,5 +6,6 @@ const router = express.Router()
 router.get('/users/account',userAccountController.getUser)
 router.delete('/users/account',userAccountController.deleteAccount)
 router.patch('/users/account',userAccountController.editAccount)
+router.post('/users/account/edit',userAccountController.confirmEmailEdit)
 
 export default router

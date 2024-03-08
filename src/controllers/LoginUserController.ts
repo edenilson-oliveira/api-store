@@ -77,17 +77,15 @@ class LoginUserControler{
   public confirmEmail = async (req: Request,res: Response) => {
     try{
       const code = await client.get('getCode')
-      console.log(code)
       if(code && req.body.code == code){
         const userCreated = await User.create(this.user)
           
         const token = generateTokenUser.execute(userCreated.dataValues.id)
         client.set('getCode','')
-        res.status(200).json({token})
+        return res.status(200).json({token})
       }
-      else{
-        res.status(400).json({message: 'Code is invalid'})
-      }
+      
+      res.status(400).json({message: 'Code is invalid'})
     }
     catch{
       res.status(500).json({message: 'Internal server error'})
