@@ -30,21 +30,22 @@ class LoginUserControler{
       
       const {firstName,lastName,email,password} = req.body
       
-      const hashPassword = await bcrypt.hash(password,10)
-      
-      const user = {
-        firstName,
-        lastName,
-        email,
-        password: hashPassword
-      }
       const validate = validator.execute(req.body)
       
-      const emailVerify = new EmailVerify(user.email)
+      const emailVerify = new EmailVerify(email ? email : '')
       
       const emailVerificationOnDatabase = await emailVerify.execute()
       
       if(validate.isValidate && !emailVerificationOnDatabase.emailExists){
+        
+        const hashPassword = await bcrypt.hash(password,10)
+      
+        const user = {
+          firstName,
+          lastName,
+          email,
+          password: hashPassword
+        }
         
         const code = new CodeGenerate().execute()
         
@@ -55,18 +56,13 @@ class LoginUserControler{
         client.expire('getCode', 60)
         
         this.user = user
-        res.status(200).json({message: 'Confirm your email'})
+        return res.status(200).json({message: 'Confirm your email'})
       }
       
-      
-      else if(emailVerificationOnDatabase
-      .emailExists){
-        res.status(409).json({message: 'Email Already Exists'})
-      }
-      
-      else{
-        res.status(400).json({message: validate.message})
-      }
+      res.status(400).json(
+        {
+          message: validate.message ? validate.message : 'Email already exists'
+        })
     }
     
     catch{
@@ -95,27 +91,24 @@ class LoginUserControler{
   public login = async (req: Request,res: Response) => {
     try{
       const { email, password } = req.body
-      const emailVerify = new EmailVerify(email)
+      const emailVerify = new EmailVerify(email? email:'')
       
       const emailVerification = await emailVerify.execute()
       
-      if(emailVerification.emailExists){
+      if(password && emailVerification.emailExists){
         const user = emailVerification.user
         const passwordValidate = await bcrypt.compare(password,user.password)
         
         if(passwordValidate){
           const token = generateTokenUser.execute(user.id)
           
-          res.json({token}).status(200)
+          return res.json({token}).status(200)
         }
-        else{
-          res.status(400).json({message: 'password is invalid'}).end()
-        }
+        
+        return res.status(400).json({message: 'password is invalid'}).end()
       }
       
-      else{
-        res.status(404).end()
-      }
+      res.status(404).end()
     }
     catch{
       res.status(500).json({message: 'Internal server error'})

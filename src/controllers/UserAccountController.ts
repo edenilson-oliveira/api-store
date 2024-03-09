@@ -143,15 +143,14 @@ class UserAccountController{
         
           client.expire('getCodeEdit', 60)
           
-          res.status(200).json({message: 'Confirm your email'})
+          return res.status(200).json({message: 'Confirm your email'})
           
         }
-        else if(!validate.isValidate){
-          res.status(400).json({message: validate.message})
-        }
-        else{
-          res.status(400).json({message: 'Email already exists'})
-        }
+        
+        res.status(400).json(
+          {
+            message: validate.message ? validate.message : 'Email already exists'
+          })
       }
     }
     catch{
