@@ -16,6 +16,7 @@ module.exports = {
       },
       userId: {
         type: Sequelize.INTEGER,
+        unique: true,
       },
       createdAt: {
         allowNull: false,

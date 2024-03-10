@@ -17,6 +17,15 @@ class GenerateRefreshToken{
       refreshToken,
       userId: id,
       expiresIn,
+      }).catch(() => {
+        RefreshToken.update({
+          refreshToken,
+          expiresIn
+      },{
+        where: {
+          userId: id
+        }
+      })
     })
     
     return refreshToken

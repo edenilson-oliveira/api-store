@@ -25,6 +25,7 @@ RefreshToken.init({
   },
   userId: {
     type: sequelize.INTEGER,
+    unique: true
   },
   createdAt: {
     allowNull: false,
