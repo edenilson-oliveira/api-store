@@ -5,6 +5,7 @@ import User from '../database/models/user';
 import EmailVerify from './EmailVerify'
 import validator from '../utils/validator'
 import generateTokenUser from '../authentication/GenerateTokenUser';
+import generateRefreshToken from '../authentication/GenerateRefreshToken';
 import VerifyToken from '../authentication/VerifyToken';
 import SendMail from '../services/mail';
 import CodeGenerate from '../services/codeGenerate';
@@ -101,11 +102,12 @@ class LoginUserControler{
         
         if(passwordValidate){
           const token = generateTokenUser.execute(user.id)
+          const refreshToken = generateRefreshToken.execute(user.id)
           
-          return res.json({token}).status(200)
+          return res.status(200).cookie('refreshToken', refreshToken, { httpOnly: true, sameSite: 'strict' }).json({token})
         }
         
-        return res.status(400).json({message: 'password is invalid'}).end()
+        return res.status(400).json({message: 'password is invalid'})
       }
       
       res.status(404).end()
