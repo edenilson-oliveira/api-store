@@ -77,9 +77,12 @@ class LoginUserControler{
       if(code && req.body.code == code){
         const userCreated = await User.create(this.user)
           
-        const token = generateTokenUser.execute(userCreated.dataValues.id)
         client.set('getCode','')
-        return res.status(200).json({token})
+        
+        const token = generateTokenUser.execute(userCreated.dataValues.id)
+        const refreshToken = generateRefreshToken.execute(userCreated.dataValues.id)
+          
+        return res.status(200).cookie('refreshToken', refreshToken, { httpOnly: true, sameSite: 'strict' }).json({token})
       }
       
       res.status(400).json({message: 'Code is invalid'})
