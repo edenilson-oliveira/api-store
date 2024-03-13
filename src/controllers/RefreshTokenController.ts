@@ -26,7 +26,7 @@ class RefreshTokenController{
         userId = tokenVerification.id
       }
       catch(err){
-        return res.status(400).json({message: 'Token is not valid',err, token})
+        return res.status(400).json({message: 'Token is not valid, try a new login'})
       }
       
       const tokenVerify = await RefreshToken.findAll({
