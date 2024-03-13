@@ -1,4 +1,5 @@
 import express from 'express';
+import cookieParser from 'cookie-parser'
 import router from './routes/'
 
 export class App{
@@ -12,6 +13,7 @@ export class App{
   
   private middleware(){
     this.server.use(express.json())
+    this.server.use(cookieParser())
   }
   
   private routes(){

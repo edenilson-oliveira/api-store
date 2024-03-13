@@ -3,7 +3,7 @@ import 'dotenv/config';
 
 class GenerateTokenUser{
   public execute(id: number): string{
-    const token = jwt.sign({id},process.env.SECRET_KEY as string, {expiresIn: process.env.EXPIRES_IN})
+    const token = jwt.sign({id},process.env.JWT_TOKEN_KEY as string, {expiresIn: process.env.EXPIRES_IN})
     
     return token
   }
