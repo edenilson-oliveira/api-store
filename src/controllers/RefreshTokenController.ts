@@ -25,10 +25,9 @@ class RefreshTokenController{
         const tokenVerification: UserId = jwt.verify(token,secretKey) as UserId
         userId = tokenVerification.id
       }
-      catch{
-        res.status(400).json({message: 'Token is not valid'})
+      catch(err){
+        return res.status(400).json({message: 'Token is not valid',err, token})
       }
-      
       
       const tokenVerify = await RefreshToken.findAll({
         where: {
