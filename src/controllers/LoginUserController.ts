@@ -11,12 +11,7 @@ import SendMail from '../services/mail';
 import CodeGenerate from '../services/codeGenerate';
 import client from '../redisConfig'
 
-interface UserInfo{
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-}
+type UserInfo = Pick<User,'firstName'|'lastName'|'email'|'password'>
 
 class LoginUserControler{
   

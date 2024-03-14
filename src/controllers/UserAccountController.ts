@@ -8,13 +8,8 @@ import VerifyToken from '../authentication/VerifyToken';
 import SendMail from '../services/mail';
 import CodeGenerate from '../services/codeGenerate';
 import client from '../redisConfig'
-//import { UserInfo } from './LoginUserController'
-interface UserInfo{
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-}
+
+type UserInfo = Pick<User,'firstName'|'lastName'|'email'|'password'>
 interface UserData{
   user: Partial<UserInfo>;
   id: number;
@@ -52,17 +47,23 @@ class UserAccountController{
   public deleteAccount = async (req: Request,res: Response) => {
     
     try{
-      
       const verifyToken = new VerifyToken().execute(req,res)
       const id = verifyToken.userId
-      
+      const passwordValidate = await client.get('passwordValidate')
       if(verifyToken.auth){
-        const user = await User.destroy({
-          where:{
-            id
-          } 
-        })
-        res.status(201).end()
+        
+        if(passwordValidate){
+        
+          const user = await User.destroy({
+            where:{
+              id
+            } 
+          })
+          client.set('passwordValidate',0)
+          return res.status(201).end()
+        }
+        
+        res.status(400).json({message: 'password is invalid or not was provided'})
       }
     }
     
@@ -70,6 +71,37 @@ class UserAccountController{
       res.status(500).json({message: 'Internal server error'})
     }
     
+  }
+  
+  public confirmDeleteAccount = async (req: Request,res: Response) => {
+    try{
+      const verifyToken = new VerifyToken().execute(req,res)
+      const id = verifyToken.userId
+      
+      if(verifyToken.auth){
+        const password = req.body.password         
+                         
+        const passwordDb = await User.findAll
+        ({           
+          attributes: ['password'], 
+          where: {             
+            id          
+            }         
+        })                  
+        const userPassword = passwordDb[0].dataValues.password          
+        const passwordValidate = await bcrypt.compare(password? password : '',userPassword)
+        
+        client.set('passwordValidate', passwordValidate ? 1:0)
+        
+        client.expire('passwordValidate', 30)
+        
+        res.status(200).end()
+      }
+    }
+    
+    catch{
+      res.status(500).json({message: 'Internal server error'})
+    }
   }
   
   public editAccount = async (req: Request,res: Response) => {
