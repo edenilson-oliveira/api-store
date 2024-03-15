@@ -45,7 +45,7 @@ class LoginUserControler{
         
         const code = new CodeGenerate().execute()
         
-        const sendMail = new SendMail(user.email,'Confirm Email', `Confirm your email with code ${code}`).execute()
+        const sendMail = new SendMail(user.email,'Confirm Email', `<p>Confirm your email with code ${code} for to create account</p>`).execute()
         
         client.set('getCode', code)
         

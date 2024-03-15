@@ -1,6 +1,7 @@
 import express from 'express';
 import cookieParser from 'cookie-parser'
 import router from './routes/'
+import helmet from 'helmet'
 
 export class App{
   public server: express.Application;
@@ -14,6 +15,7 @@ export class App{
   private middleware(){
     this.server.use(express.json())
     this.server.use(cookieParser())
+    this.server.use(helmet())
   }
   
   private routes(){

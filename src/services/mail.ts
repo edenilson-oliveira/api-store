@@ -7,12 +7,12 @@ dotenv.config({path: path.resolve(__dirname, '../../.env')})
 class SendMail{
   private to: string;
   private subject: string;
-  private message: string;
+  private html: string;
   
-  constructor(to: string,subject: string,message: string){
+  constructor(to: string,subject: string,html: string){
     this.to = to
     this.subject = subject
-    this.message = message
+    this.html = html
   }
   
   public execute(){
@@ -33,7 +33,7 @@ class SendMail{
       from: 'api.store@example.com',
       to: this.to,
       subject: this.subject,
-      message: this.message
+      html: this.html
     }
     
     transporter.sendMail(options,(err,data) => {

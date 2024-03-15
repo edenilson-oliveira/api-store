@@ -52,7 +52,7 @@ class UserAccountController{
       const passwordValidate = await client.get('passwordValidate')
       if(verifyToken.auth){
         
-        if(passwordValidate){
+        if(passwordValidate && Number(passwordValidate)){
         
           const user = await User.destroy({
             where:{
@@ -169,7 +169,7 @@ class UserAccountController{
           
           const code = new CodeGenerate().execute()
         
-          const sendMail = new SendMail(user.email,'Confirm Email', `Confirm your email with code ${code}`).execute()
+          const sendMail = new SendMail(user.email,'Confirm Email',  `<p>Confirm your email with code ${code} for to edit account</p>`).execute()
         
           client.set('getCodeEdit', code)
         
