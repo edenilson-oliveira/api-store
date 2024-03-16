@@ -89,7 +89,7 @@ class UserAccountController{
             }         
         })                  
         const userPassword = passwordDb[0].dataValues.password          
-        const passwordValidate = await bcrypt.compare(password? password : '',userPassword)
+        const passwordValidate = await bcrypt.compare(password || '',userPassword)
         
         client.set('passwordValidate', passwordValidate ? 1:0)
         
@@ -134,9 +134,9 @@ class UserAccountController{
         }
         
         const user = {
-          firstName: firstName ? firstName: userInfo.firstName,
-          lastName: lastName ? lastName: userInfo.lastName,
-          email: email ? email: userInfo.email,
+          firstName: firstName || userInfo.firstName,
+          lastName: lastName || userInfo.lastName,
+          email: email || userInfo.email,
           password: userPassword
         }
         

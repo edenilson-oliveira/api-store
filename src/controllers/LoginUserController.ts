@@ -1,4 +1,4 @@
-import { Request,Response } from 'express';
+import { Request,Response,NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import User from '../database/models/user';
 
@@ -28,7 +28,7 @@ class LoginUserControler{
       
       const validate = validator.execute(req.body)
       
-      const emailVerify = new EmailVerify(email ? email : '')
+      const emailVerify = new EmailVerify(email || '')
       
       const emailVerificationOnDatabase = await emailVerify.execute()
       
@@ -57,7 +57,7 @@ class LoginUserControler{
       
       res.status(400).json(
         {
-          message: validate.message ? validate.message : 'Email already exists'
+          message: validate.message || 'Email already exists'
         })
     }
     
@@ -87,12 +87,13 @@ class LoginUserControler{
     }
   }
   
-  public login = async (req: Request,res: Response) => {
+  public login = async (req: Request,res: Response,next: NextFunction) => {
     try{
       const { email, password } = req.body
-      const emailVerify = new EmailVerify(email? email:'')
+      const emailVerify = new EmailVerify(email || '')
       
       const emailVerification = await emailVerify.execute()
+      
       
       if(password && emailVerification.emailExists){
         const user = emailVerification.user
