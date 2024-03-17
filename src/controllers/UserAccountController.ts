@@ -1,10 +1,10 @@
-import { Request,Response } from 'express';
+import { Request,Response,NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import User from '../database/models/user';
 import EmailVerify from './EmailVerify'
 import validator from '../utils/validator'
 import generateTokenUser from '../authentication/GenerateTokenUser';
-import VerifyToken from '../authentication/VerifyToken';
+import verifyTokenUser from '../authentication/VerifyToken';
 import SendMail from '../services/mail';
 import CodeGenerate from '../services/codeGenerate';
 import client from '../redisConfig'
@@ -23,11 +23,11 @@ class UserAccountController{
     this.userData = {user:{},id:0}
   }
   
-  public getUser = async (req: Request,res: Response) => {
+  public getUser = async (req: Request,res: Response,next: NextFunction) => {
     
     try{
       
-      const verifyToken = new VerifyToken().execute(req,res)
+      const verifyToken = verifyTokenUser.execute(req,res)
       const id = verifyToken.userId
       
       if(verifyToken.auth){
@@ -44,10 +44,10 @@ class UserAccountController{
     }
   }
   
-  public deleteAccount = async (req: Request,res: Response) => {
+  public deleteAccount = async (req: Request,res: Response,next: NextFunction) => {
     
     try{
-      const verifyToken = new VerifyToken().execute(req,res)
+      const verifyToken = verifyTokenUser.execute(req,res)
       const id = verifyToken.userId
       const passwordValidate = await client.get(`password-validate-${id}`)
       if(verifyToken.auth){
@@ -73,9 +73,9 @@ class UserAccountController{
     
   }
   
-  public confirmDeleteAccount = async (req: Request,res: Response) => {
+  public confirmDeleteAccount = async (req: Request,res: Response,next: NextFunction) => {
     try{
-      const verifyToken = new VerifyToken().execute(req,res)
+      const verifyToken = verifyTokenUser.execute(req,res)
       const id = verifyToken.userId
       
       if(verifyToken.auth){
@@ -104,11 +104,11 @@ class UserAccountController{
     }
   }
   
-  public editAccount = async (req: Request,res: Response) => {
+  public editAccount = async (req: Request,res: Response,next: NextFunction) => {
    
     
     try{
-      const verifyToken = new VerifyToken().execute(req,res)
+      const verifyToken = verifyTokenUser.execute(req,res)
       const id = verifyToken.userId
       if(verifyToken.auth){
         
@@ -190,9 +190,9 @@ class UserAccountController{
     }
   }
   
-  public confirmEmailEdit = async (req: Request,res: Response) => {
+  public confirmEmailEdit = async (req: Request,res: Response,next: NextFunction) => {
     try{
-      const verifyToken = new VerifyToken().execute(req,res)
+      const verifyToken = verifyTokenUser.execute(req,res)
       const id = verifyToken.userId
       
       if(verifyToken.auth){

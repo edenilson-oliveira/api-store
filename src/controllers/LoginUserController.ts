@@ -6,7 +6,6 @@ import EmailVerify from './EmailVerify'
 import validator from '../utils/validator'
 import generateTokenUser from '../authentication/GenerateTokenUser';
 import generateRefreshToken from '../authentication/GenerateRefreshToken';
-import VerifyToken from '../authentication/VerifyToken';
 import SendMail from '../services/mail';
 import CodeGenerate from '../services/codeGenerate';
 import client from '../redisConfig'
