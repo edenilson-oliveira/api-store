@@ -49,7 +49,7 @@ class UserAccountController{
     try{
       const verifyToken = new VerifyToken().execute(req,res)
       const id = verifyToken.userId
-      const passwordValidate = await client.get('passwordValidate')
+      const passwordValidate = await client.get(`password-validate-${id}`)
       if(verifyToken.auth){
         
         if(passwordValidate && Number(passwordValidate)){
@@ -59,7 +59,7 @@ class UserAccountController{
               id
             } 
           })
-          client.set('passwordValidate',0)
+          client.del(`password-validate-${id}`)
           return res.status(201).end()
         }
         
@@ -91,9 +91,9 @@ class UserAccountController{
         const userPassword = passwordDb[0].dataValues.password          
         const passwordValidate = await bcrypt.compare(password || '',userPassword)
         
-        client.set('passwordValidate', passwordValidate ? 1:0)
+        client.set(`password-validate-${id}`, passwordValidate ? 1:0)
         
-        client.expire('passwordValidate', 30)
+        client.expire(`password-validate-${id}`, 30)
         
         res.status(200).end()
       }
@@ -171,9 +171,9 @@ class UserAccountController{
         
           const sendMail = new SendMail(user.email,'Confirm Email',  `<p>Confirm your email with code ${code} for to edit account</p>`).execute()
         
-          client.set('getCodeEdit', code)
+          client.set(`code-edit-${id}`,code)
         
-          client.expire('getCodeEdit', 60)
+          client.expire(`code-edit-${id}`, 60)
           
           return res.status(200).json({message: 'Confirm your email'})
           
@@ -192,23 +192,28 @@ class UserAccountController{
   
   public confirmEmailEdit = async (req: Request,res: Response) => {
     try{
-      const code = await client.get('getCodeEdit')
-      if(req.body.code === code){
-        
-        const { user,id } = this.userData
-        
-        await User.update(user,{
-          where: {
-            id
-          }
-        })
-        
-        client.set('getCodeEdit','')
-        
-        return res.status(200).end()
-      }
+      const verifyToken = new VerifyToken().execute(req,res)
+      const id = verifyToken.userId
       
-      res.status(400).json({message: 'Code is invalid'})
+      if(verifyToken.auth){
+        const code = await client.get(`code-edit-${id}`)
+        if(req.body.code === code){
+          
+          const { user,id } = this.userData
+          
+          await User.update(user,{
+            where: {
+              id
+            }
+          })
+          
+          client.del(`code-edit-${id}`)
+          
+          return res.status(200).end()
+        }
+        
+        res.status(400).json({message: 'Code is invalid'})
+      }
     }
     catch{
       res.status(500).json({message: 'Internal server error'})

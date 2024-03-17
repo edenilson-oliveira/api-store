@@ -47,9 +47,9 @@ class LoginUserControler{
         
         const sendMail = new SendMail(user.email,'Confirm Email', `<p>Confirm your email with code ${code} for to create account</p>`).execute()
         
-        client.set('getCode', code)
+        client.set(`code-${user.email}`, code)
         
-        client.expire('getCode', 60)
+        client.expire(`code-${user.email}`, 60)
         
         this.user = user
         return res.status(200).json({message: 'Confirm your email'})
@@ -68,11 +68,13 @@ class LoginUserControler{
   
   public confirmEmail = async (req: Request,res: Response) => {
     try{
-      const code = await client.get('getCode')
+      const email = req.body.email || ''
+      
+      const code = await client.get(`code-${email}`)
       if(code && req.body.code == code){
         const userCreated = await User.create(this.user)
           
-        client.set('getCode','')
+        client.del(`code-${email}`)
         
         const token = generateTokenUser.execute(userCreated.dataValues.id)
         const refreshToken = generateRefreshToken.execute(userCreated.dataValues.id)
