@@ -34,10 +34,10 @@ class VerifyToken{
     
   }
   
-  public getTokenOnly(token: string): TokenUser{
+  public getTokenOnly(token: string,secretKey=process.env.JWT_TOKEN_KEY): TokenUser{
     let tokenVerification: TokenUser = {id:0};
     try{
-      tokenVerification = jwt.verify(token,process.env.JWT_TOKEN_KEY as string) as TokenUser
+      tokenVerification = jwt.verify(token, secretKey as string) as TokenUser
     }
     catch{
       return tokenVerification

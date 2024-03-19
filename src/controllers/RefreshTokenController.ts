@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import RefreshToken from '../database/models/refreshToken';
 import 'dotenv/config'
 import generateTokenUser from '../authentication/GenerateTokenUser';
+import verifyToken from '../authentication/VerifyToken'; 
 
 interface UserId{
   id: number;
@@ -13,19 +14,16 @@ class RefreshTokenController{
     try{
       const token  = req.cookies.refreshToken
       
-      const secretKey = process.env.JWT_REFRESH_TOKEN_KEY as string
+      const secretKey = process.env.JWT_REFRESH_TOKEN_KEY
       
-      let userId = 0
-      
-      try{
-        if(!token){
-          return res.status(401).json({message: 'Refresh Token not was provided'})
-        }
-        
-        const tokenVerification: UserId = jwt.verify(token,secretKey) as UserId
-        userId = tokenVerification.id
+      if(!token){
+        return res.status(401).json({message: 'Refresh Token not was provided'})
       }
-      catch(err){
+        
+      const tokenVerification = verifyToken.getTokenOnly(token,secretKey)
+      const userId = Number(tokenVerification.id)
+        
+      if(!userId){
         return res.status(400).json({message: 'Token is not valid, try a new login'})
       }
       
