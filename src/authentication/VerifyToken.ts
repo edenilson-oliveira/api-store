@@ -5,7 +5,7 @@ import 'dotenv/config';
 
 interface Auth{
   auth: boolean;
-  userId?: TokenUser;
+  userId?: number;
 }
 
 interface TokenUser{
@@ -13,29 +13,58 @@ interface TokenUser{
 }
 
 class VerifyToken{
+  private BearerHeaderData: {exist: boolean, token: string};
+  
+  constructor(){
+    this.BearerHeaderData = {exist: false, token: ''}
+  }
+  
+  public getBearerHeaderData(){
+    return this.BearerHeaderData
+  }
+  
+  public TokenOnBearerHeader(req: Request,res: Response) {
+    const bearerHeader = req.headers['authorization']
+    
+    if(bearerHeader){
+      const token = bearerHeader.split('Bearer ')[1]
+      this.BearerHeaderData.token = token
+      this.BearerHeaderData.exist = true
+    }
+    
+  }
+  
+  public getTokenOnly(token: string,secretKey=process.env.JWT_TOKEN_KEY): TokenUser{
+    let tokenVerification: TokenUser = {id:0};
+    try{
+      tokenVerification = jwt.verify(token, secretKey as string) as TokenUser
+    }
+    catch{
+      return tokenVerification
+    }
+    return tokenVerification
+  }
+  
+  
   public execute(req: Request,res: Response): Auth{
-      const bearerHeader = req.headers['authorization']
-      if(bearerHeader){
-        const token = bearerHeader.split('Bearer ')[1]
+      this.TokenOnBearerHeader(req,res)
+      const { exist } =  this.BearerHeaderData
+      if(exist){
+        const { token } = this.BearerHeaderData
+        const verifyToken = this.getTokenOnly(token)
         
-        const tokenVerification:any = jwt.verify(token,process.env.JWT_TOKEN_KEY as string,(err,decoded): any => {
-          if(err){
-            res.status(401).json({message: 'Failed to authenticate token'})
-            return {auth: false}
-          }
-          const user = decoded as TokenUser
+        if(!verifyToken.id){
+          res.status(401).json({message: 'Failed to authenticate token'})
+          return {auth: false}
           
-          return {auth: true,userId: user.id}
-        })
-        
-        return tokenVerification
+        }
+        return {auth: true,userId: verifyToken.id}
         
       }
-      else{
-        res.status(400).json({message:'Token not was provided'})
-        return {auth: false}
-      }
+      
+      res.status(400).json({message:'Token not was provided'})
+      return {auth: false}
   }
 }
 
-export default VerifyToken
+export default new VerifyToken

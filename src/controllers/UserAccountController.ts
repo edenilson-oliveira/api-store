@@ -1,20 +1,15 @@
-import { Request,Response } from 'express';
+import { Request,Response,NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import User from '../database/models/user';
 import EmailVerify from './EmailVerify'
 import validator from '../utils/validator'
 import generateTokenUser from '../authentication/GenerateTokenUser';
-import VerifyToken from '../authentication/VerifyToken';
+import verifyTokenUser from '../authentication/VerifyToken';
 import SendMail from '../services/mail';
 import CodeGenerate from '../services/codeGenerate';
 import client from '../redisConfig'
-//import { UserInfo } from './LoginUserController'
-interface UserInfo{
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-}
+
+type UserInfo = Pick<User,'firstName'|'lastName'|'email'|'password'>
 interface UserData{
   user: Partial<UserInfo>;
   id: number;
@@ -28,11 +23,11 @@ class UserAccountController{
     this.userData = {user:{},id:0}
   }
   
-  public getUser = async (req: Request,res: Response) => {
+  public getUser = async (req: Request,res: Response,next: NextFunction) => {
     
     try{
       
-      const verifyToken = new VerifyToken().execute(req,res)
+      const verifyToken = verifyTokenUser.execute(req,res)
       const id = verifyToken.userId
       
       if(verifyToken.auth){
@@ -49,20 +44,26 @@ class UserAccountController{
     }
   }
   
-  public deleteAccount = async (req: Request,res: Response) => {
+  public deleteAccount = async (req: Request,res: Response,next: NextFunction) => {
     
     try{
-      
-      const verifyToken = new VerifyToken().execute(req,res)
+      const verifyToken = verifyTokenUser.execute(req,res)
       const id = verifyToken.userId
-      
+      const passwordValidate = await client.get(`password-validate-${id}`)
       if(verifyToken.auth){
-        const user = await User.destroy({
-          where:{
-            id
-          } 
-        })
-        res.status(201).end()
+        
+        if(passwordValidate && Number(passwordValidate)){
+        
+          const user = await User.destroy({
+            where:{
+              id
+            } 
+          })
+          client.del(`password-validate-${id}`)
+          return res.status(201).end()
+        }
+        
+        res.status(400).json({message: 'password is invalid or not was provided'})
       }
     }
     
@@ -72,11 +73,42 @@ class UserAccountController{
     
   }
   
-  public editAccount = async (req: Request,res: Response) => {
+  public confirmDeleteAccount = async (req: Request,res: Response,next: NextFunction) => {
+    try{
+      const verifyToken = verifyTokenUser.execute(req,res)
+      const id = verifyToken.userId
+      
+      if(verifyToken.auth){
+        const password = req.body.password         
+                         
+        const passwordDb = await User.findAll
+        ({           
+          attributes: ['password'], 
+          where: {             
+            id          
+            }         
+        })                  
+        const userPassword = passwordDb[0].dataValues.password          
+        const passwordValidate = await bcrypt.compare(password || '',userPassword)
+        
+        client.set(`password-validate-${id}`, passwordValidate ? 1:0)
+        
+        client.expire(`password-validate-${id}`, 30)
+        
+        res.status(200).end()
+      }
+    }
+    
+    catch{
+      res.status(500).json({message: 'Internal server error'})
+    }
+  }
+  
+  public editAccount = async (req: Request,res: Response,next: NextFunction) => {
    
     
     try{
-      const verifyToken = new VerifyToken().execute(req,res)
+      const verifyToken = verifyTokenUser.execute(req,res)
       const id = verifyToken.userId
       if(verifyToken.auth){
         
@@ -102,9 +134,9 @@ class UserAccountController{
         }
         
         const user = {
-          firstName: firstName ? firstName: userInfo.firstName,
-          lastName: lastName ? lastName: userInfo.lastName,
-          email: email ? email: userInfo.email,
+          firstName: firstName || userInfo.firstName,
+          lastName: lastName || userInfo.lastName,
+          email: email || userInfo.email,
           password: userPassword
         }
         
@@ -137,11 +169,11 @@ class UserAccountController{
           
           const code = new CodeGenerate().execute()
         
-          const sendMail = new SendMail(user.email,'Confirm Email', `Confirm your email with code ${code}`).execute()
+          const sendMail = new SendMail(user.email,'Confirm Email',  `<p>Confirm your email with code ${code} for to edit account</p>`).execute()
         
-          client.set('getCodeEdit', code)
+          client.set(`code-edit-${id}`,code)
         
-          client.expire('getCodeEdit', 60)
+          client.expire(`code-edit-${id}`, 60)
           
           return res.status(200).json({message: 'Confirm your email'})
           
@@ -158,25 +190,30 @@ class UserAccountController{
     }
   }
   
-  public confirmEmailEdit = async (req: Request,res: Response) => {
+  public confirmEmailEdit = async (req: Request,res: Response,next: NextFunction) => {
     try{
-      const code = await client.get('getCodeEdit')
-      if(req.body.code === code){
-        
-        const { user,id } = this.userData
-        
-        await User.update(user,{
-          where: {
-            id
-          }
-        })
-        
-        client.set('getCodeEdit','')
-        
-        return res.status(200).end()
-      }
+      const verifyToken = verifyTokenUser.execute(req,res)
+      const id = verifyToken.userId
       
-      res.status(400).json({message: 'Code is invalid'})
+      if(verifyToken.auth){
+        const code = await client.get(`code-edit-${id}`)
+        if(req.body.code === code){
+          
+          const { user,id } = this.userData
+          
+          await User.update(user,{
+            where: {
+              id
+            }
+          })
+          
+          client.del(`code-edit-${id}`)
+          
+          return res.status(200).end()
+        }
+        
+        res.status(400).json({message: 'Code is invalid'})
+      }
     }
     catch{
       res.status(500).json({message: 'Internal server error'})

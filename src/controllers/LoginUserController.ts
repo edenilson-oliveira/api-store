@@ -1,4 +1,4 @@
-import { Request,Response } from 'express';
+import { Request,Response,NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import User from '../database/models/user';
 
@@ -6,17 +6,11 @@ import EmailVerify from './EmailVerify'
 import validator from '../utils/validator'
 import generateTokenUser from '../authentication/GenerateTokenUser';
 import generateRefreshToken from '../authentication/GenerateRefreshToken';
-import VerifyToken from '../authentication/VerifyToken';
 import SendMail from '../services/mail';
 import CodeGenerate from '../services/codeGenerate';
 import client from '../redisConfig'
 
-interface UserInfo{
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-}
+type UserInfo = Pick<User,'firstName'|'lastName'|'email'|'password'>
 
 class LoginUserControler{
   
@@ -33,7 +27,7 @@ class LoginUserControler{
       
       const validate = validator.execute(req.body)
       
-      const emailVerify = new EmailVerify(email ? email : '')
+      const emailVerify = new EmailVerify(email || '')
       
       const emailVerificationOnDatabase = await emailVerify.execute()
       
@@ -50,11 +44,11 @@ class LoginUserControler{
         
         const code = new CodeGenerate().execute()
         
-        const sendMail = new SendMail(user.email,'Confirm Email', `Confirm your email with code ${code}`).execute()
+        const sendMail = new SendMail(user.email,'Confirm Email', `<p>Confirm your email with code ${code} for to create account</p>`).execute()
         
-        client.set('getCode', code)
+        client.set(`code-${user.email}`, code)
         
-        client.expire('getCode', 60)
+        client.expire(`code-${user.email}`, 60)
         
         this.user = user
         return res.status(200).json({message: 'Confirm your email'})
@@ -62,7 +56,7 @@ class LoginUserControler{
       
       res.status(400).json(
         {
-          message: validate.message ? validate.message : 'Email already exists'
+          message: validate.message || 'Email already exists'
         })
     }
     
@@ -73,11 +67,13 @@ class LoginUserControler{
   
   public confirmEmail = async (req: Request,res: Response) => {
     try{
-      const code = await client.get('getCode')
+      const email = req.body.email || ''
+      
+      const code = await client.get(`code-${email}`)
       if(code && req.body.code == code){
         const userCreated = await User.create(this.user)
           
-        client.set('getCode','')
+        client.del(`code-${email}`)
         
         const token = generateTokenUser.execute(userCreated.dataValues.id)
         const refreshToken = generateRefreshToken.execute(userCreated.dataValues.id)
@@ -92,12 +88,13 @@ class LoginUserControler{
     }
   }
   
-  public login = async (req: Request,res: Response) => {
+  public login = async (req: Request,res: Response,next: NextFunction) => {
     try{
       const { email, password } = req.body
-      const emailVerify = new EmailVerify(email? email:'')
+      const emailVerify = new EmailVerify(email || '')
       
       const emailVerification = await emailVerify.execute()
+      
       
       if(password && emailVerification.emailExists){
         const user = emailVerification.user
