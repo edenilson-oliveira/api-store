@@ -28,7 +28,7 @@ describe('Tests of routes login', () => {
   it('should return token after login', async () => {
     
     const data = {
-      email: 'edenilsonoliveira270@gmail.com',
+      email: 'teste@example.com',
       password: '12345678'
     }
     
