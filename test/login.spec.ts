@@ -15,7 +15,7 @@ describe('Tests of routes login', () => {
       firstName: 'John',
       lastName: 'Doe',
       password: '12345678',
-      email: 'teste@gmail.com'
+      email: 'teste@example.com'
     }
     
     const res = await request(app)
@@ -23,5 +23,19 @@ describe('Tests of routes login', () => {
     .send(data)
     
     expect(res.statusCode).toBe(200)
-  }),
+  })
+  
+  it('should return token after login', async () => {
+    
+    const data = {
+      email: 'edenilsonoliveira270@gmail.com',
+      password: '12345678'
+    }
+    
+    const res = await request(app)
+    .post('/users/login')
+    .send(data)
+    
+    expect(res.statusCode).toBe(200)
+  })
 })
