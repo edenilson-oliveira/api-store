@@ -1,8 +1,9 @@
 import request from 'supertest';
 import { App } from '../src/app';
-import client from '../src/redisConfig'
+import client from '../src/redisConfig';
+import { Request,Response } from 'express';
 
-describe('Tests of refresh token', () => {
+describe('Tests of routes token', () => {
   
   const app = new App().server
   afterAll(() => {
@@ -14,9 +15,9 @@ describe('Tests of refresh token', () => {
     const res = await request(app)
     .get('/refreshToken')
     .set('Cookie', [
-    'refreshToken=token', 
+    'refreshToken=', 
     ])
     
-    expect(res.statusCode).toBe(200)
+    expect(res.statusCode).toBe(401)
   })
 })
