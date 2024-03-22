@@ -21,7 +21,7 @@ export class App{
     this.server.use(bodyParser.urlencoded({ extended: true }));
     this.server.use(cookieParser())
     this.server.use(helmet())
-    this.server.use(rateLimit('all',100,60*50))
+    this.server.use(rateLimit('all',100,60*5))
     this.server.use(toobusy)
     this.server.use(cors({
       origin: 'http://localhost'

@@ -58,6 +58,7 @@ class VerifyToken{
           return {auth: false}
           
         }
+        
         return {auth: true,userId: verifyToken.id}
         
       }

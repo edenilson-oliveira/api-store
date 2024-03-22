@@ -18,7 +18,7 @@ class Validator{
     const {firstName,lastName,email,password} = user
     
     const validateName = /^[A-Za-zÀ-ÖØ-öø-ÿ ']{3,}$/
-    const validateEmail = /^[a-z0-9/.]+@[a-z]+(\.[a-z]+){1,}$/
+    const validateEmail = /^[a-z0-9/./_/-]+@[a-z]+(\.[a-z]+){1,}$/
     
     try{
       if(!(firstName && lastName && validateName.exec(firstName) && validateName.exec(lastName))){

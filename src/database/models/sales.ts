@@ -60,4 +60,11 @@ Sales.init({
     allowNull: false,
     type: sequelize.DATE,
     defaultValue: new Date(),
-}
+  }
+},{
+  sequelize: db,
+  tableName: 'sales',
+  timestamps: true,
+})
+
+export default Sales
