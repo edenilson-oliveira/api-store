@@ -40,9 +40,11 @@ class SalesController{
         <p>Confirm your email with code ${code} for to create account of sales</p>
         `).execute()
         
-        client.set(`code-sales-${email}`, code)
+        const userSalesEmail = { email, code }
         
-        client.expire(`code-sales-${email}`, 60)
+        client.set(`user-sales-${id}`, JSON.stringify(userSalesEmail))
+        
+        client.expire(`user-sales-${id}`, 60)
         
         
         return res.status(200).json('confirm your email')
@@ -52,6 +54,42 @@ class SalesController{
     }
   catch{
     res.status(500).json({message: 'Internal server error'})
+    }
+  }
+  
+  public async confirmEmailSales(req: Request,res: Response){
+    try{
+      const verifyToken = verifyTokenUser.execute(req,res)
+      const id = verifyToken.userId
+      
+      if(!verifyToken.auth){
+        return
+      }
+      
+      const userCode = req.body.code
+      
+      const userInfo  = await client.get(`user-sales-${id}`) || ''
+      
+      if(!userInfo){
+        return res.status(404).end()
+      }
+      
+      const { code, email } = JSON.parse(userInfo)
+      
+      if(userCode === code){
+        const userSalesContact = { email, phone: '' } 
+        client.set(`user-sales-contact-${id}`, JSON.stringify(userSalesContact))
+        client.expire(`user-sales-contact-${id}`, 60 * 60 * 24)
+        
+        return res.status(200).json({ message: 'Email confirmed successfully'})
+      }
+      
+      res.status(400).json({message: 'Code is not valid'})
+      
+    }
+    
+    catch{
+      res.status(500).json({message: 'Internal server error'})
     }
   }
 }
