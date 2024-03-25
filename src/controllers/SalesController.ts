@@ -58,6 +58,35 @@ class SalesController{
   }
   
   public async confirmEmailSales(req: Request,res: Response){
+    const verifyToken = verifyTokenUser.execute(req,res)
+    const id = verifyToken.userId
+      
+    if(!verifyToken.auth){
+      return
+    }
+      
+    const userCode = req.body.code
+      
+    const userInfo  = await client.get(`user-sales-${id}`) || ''
+      
+    if(!userInfo){
+      return res.status(404).end()
+    }
+      
+    const { code, email } = JSON.parse(userInfo)
+      
+    if(userCode === code){
+      const userSalesContact = { email, phone: '' } 
+      client.set(`user-sales-contact-${id}`, JSON.stringify(userSalesContact))
+      client.expire(`user-sales-contact-${id}`, 60 * 60 * 24)
+        
+      return res.status(200).json({ message: 'Email confirmed successfully'})
+    }
+      
+    res.status(400).json({message: 'Code is not valid'})
+  }
+  
+  public async AddPhoneStore(req: Request,res: Response){
     try{
       const verifyToken = verifyTokenUser.execute(req,res)
       const id = verifyToken.userId
@@ -66,32 +95,31 @@ class SalesController{
         return
       }
       
-      const userCode = req.body.code
-      
-      const userInfo  = await client.get(`user-sales-${id}`) || ''
-      
-      if(!userInfo){
-        return res.status(404).end()
-      }
-      
-      const { code, email } = JSON.parse(userInfo)
-      
-      if(userCode === code){
-        const userSalesContact = { email, phone: '' } 
-        client.set(`user-sales-contact-${id}`, JSON.stringify(userSalesContact))
-        client.expire(`user-sales-contact-${id}`, 60 * 60 * 24)
+      const { phone } = req.body
         
-        return res.status(200).json({ message: 'Email confirmed successfully'})
+      const validatePhone = /[(]{1}[0-9]{2}[)] [0-9]{4}[-][0-9]{4}$/
+      
+      const phoneIsValide = validatePhone.exec(phone)
+      
+      if(phoneIsValide){
+        const salesEmail = await Sales.findAll({
+          where: {
+            phone
+          }
+        })
+        
+        if(salesEmail.length > 0){
+          return res.status(409).json({message: 'Phone number already exist'})
+        }
+        
+        const code = new CodeGenerate().execute()
       }
-      
-      res.status(400).json({message: 'Code is not valid'})
-      
     }
-    
     catch{
       res.status(500).json({message: 'Internal server error'})
     }
   }
+  
 }
 
 export default new SalesController
