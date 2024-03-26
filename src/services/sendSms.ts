@@ -22,7 +22,7 @@ class SendSms{
        from: phoneNumber,
        to: this.to
      }).then(message => message)
-      .catch(err => err);
+      .catch(err => err.message);
      
      return response
   }

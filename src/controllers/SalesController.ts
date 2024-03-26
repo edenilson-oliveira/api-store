@@ -2,6 +2,7 @@ import { Request,Response,NextFunction } from 'express';
 import Sales from '../database/models/sales';
 import verifyTokenUser from '../authentication/VerifyToken';
 import SendMail from '../services/mail';
+import SendSms from '../services/sendSms'
 import CodeGenerate from '../services/codeGenerate';
 import client from '../redisConfig'
 
@@ -42,12 +43,12 @@ class SalesController{
         
         const userSalesEmail = { email, code }
         
-        client.set(`user-sales-${id}`, JSON.stringify(userSalesEmail))
+        client.set(`user-sales-email-${id}`, JSON.stringify(userSalesEmail))
         
-        client.expire(`user-sales-${id}`, 60)
+        client.expire(`user-sales-email-${id}`, 60)
         
         
-        return res.status(200).json('confirm your email')
+        return res.status(200).json('Confirm your email')
       }
       
       res.status(400).json({message: 'Email is not valid'})
@@ -67,7 +68,7 @@ class SalesController{
       
     const userCode = req.body.code
       
-    const userInfo  = await client.get(`user-sales-${id}`) || ''
+    const userInfo  = await client.get(`user-sales-email-${id}`) || ''
       
     if(!userInfo){
       return res.status(404).end()
@@ -79,7 +80,8 @@ class SalesController{
       const userSalesContact = { email, phone: '' } 
       client.set(`user-sales-contact-${id}`, JSON.stringify(userSalesContact))
       client.expire(`user-sales-contact-${id}`, 60 * 60 * 24)
-        
+      client.del(`user-sales-email-${id}`)
+      
       return res.status(200).json({ message: 'Email confirmed successfully'})
     }
       
@@ -96,30 +98,45 @@ class SalesController{
       }
       
       const { phone } = req.body
-        
-      const validatePhone = /[(]{1}[0-9]{2}[)] [0-9]{4}[-][0-9]{4}$/
+      const validatePhone = /[+]{1}[0-9]{13}$/
       
       const phoneIsValide = validatePhone.exec(phone)
       
       if(phoneIsValide){
-        const salesEmail = await Sales.findAll({
+        const salesPhone = await Sales.findAll({
           where: {
             phone
           }
         })
         
-        if(salesEmail.length > 0){
+        if(salesPhone.length > 0){
           return res.status(409).json({message: 'Phone number already exist'})
         }
         
         const code = new CodeGenerate().execute()
+        
+        const userSalesPhone = { phone, code }
+        
+        const sendSms = new SendSms(`Confirm your phone number with code ${code}`, phone)
+        const send = await sendSms.execute()
+        
+        if(!send.body){
+          return res.status(400).json({message: send})
+        }
+        
+        client.set(`user-sales-phone-${id}`, JSON.stringify(userSalesPhone))
+        
+        client.expire(`user-sales-phone-${id}`, 60)
+        
+        return res.status(200).json('Confirm your phone number')
       }
+      
+      res.status(400).json({message: 'Phone number is not valid'})
     }
     catch{
       res.status(500).json({message: 'Internal server error'})
     }
   }
-  
 }
 
 export default new SalesController
