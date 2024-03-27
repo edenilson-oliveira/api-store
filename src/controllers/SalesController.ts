@@ -77,7 +77,10 @@ class SalesController{
     const { code, email } = JSON.parse(userInfo)
       
     if(userCode === code){
-      const userSalesContact = { email, phone: '' } 
+      const userContact  = await client.get(`user-sales-contact-${id}`) || ''
+      
+      const userSalesContact = { email, phone: JSON.parse(userContact).phone} 
+      
       client.set(`user-sales-contact-${id}`, JSON.stringify(userSalesContact))
       client.expire(`user-sales-contact-${id}`, 60 * 60 * 24)
       client.del(`user-sales-email-${id}`)
@@ -137,6 +140,40 @@ class SalesController{
       res.status(500).json({message: 'Internal server error'})
     }
   }
+  
+  public async confirmPhoneSales(req: Request,res: Response){
+    const verifyToken = verifyTokenUser.execute(req,res)
+    const id = verifyToken.userId
+      
+    if(!verifyToken.auth){
+      return
+    }
+      
+    const userCode = req.body.code
+      
+    const userInfo  = await client.get(`user-sales-phone-${id}`) || ''
+      
+    if(!userInfo){
+      return res.status(404).end()
+    }
+      
+    const { code, phone } = JSON.parse(userInfo)
+      
+    if(userCode === code){
+      const userContact  = await client.get(`user-sales-contact-${id}`) || ''
+      
+      const userSalesContact = { email: JSON.parse(userContact).email, phone } 
+      
+      client.set(`user-sales-contact-${id}`, JSON.stringify(userSalesContact))
+      client.expire(`user-sales-contact-${id}`, 60 * 60 * 24)
+      client.del(`user-sales-phone-${id}`)
+      
+      return res.status(200).json({ message: 'Phone number confirmed successfully'})
+    }
+      
+    res.status(400).json({message: 'Code is not valid'})
+  }
+  
 }
 
 export default new SalesController
