@@ -79,7 +79,7 @@ class SalesController{
     if(userCode === code){
       const userContact  = await client.get(`user-sales-contact-${id}`) || ''
       
-      const userSalesContact = { email, phone: JSON.parse(userContact).phone} 
+      const userSalesContact = { email, phone: userContact ? JSON.parse(userContact).phone: ''} 
       
       client.set(`user-sales-contact-${id}`, JSON.stringify(userSalesContact))
       client.expire(`user-sales-contact-${id}`, 60 * 60 * 24)
@@ -162,7 +162,11 @@ class SalesController{
     if(userCode === code){
       const userContact  = await client.get(`user-sales-contact-${id}`) || ''
       
-      const userSalesContact = { email: JSON.parse(userContact).email, phone } 
+      const userSalesContact = {
+        email: userContact ? JSON.parse(userContact).email: '',
+        phone 
+        
+      } 
       
       client.set(`user-sales-contact-${id}`, JSON.stringify(userSalesContact))
       client.expire(`user-sales-contact-${id}`, 60 * 60 * 24)
@@ -174,6 +178,22 @@ class SalesController{
     res.status(400).json({message: 'Code is not valid'})
   }
   
+  public async AddInfoStore(req: Request,res: Response){
+    const verifyToken = verifyTokenUser.execute(req,res)
+    const id = verifyToken.userId
+      
+    if(!verifyToken.auth){
+      return
+    }
+    
+    const { name,description,category,status } = req.body
+    
+    if(!name || !status){
+      return res.status(400).json({message: 'Error name and status infos are required'})
+    }
+    
+    res.status(200).end()
+  }
 }
 
 export default new SalesController

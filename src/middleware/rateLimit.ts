@@ -18,9 +18,11 @@ const rateLimit = (resource: string, limit=10,time=60) => async (req: Request,re
     'X-RateLimit-Limit': limit,
     'X-RateLimit-Remaining': Number(requestCount) >= limit ? 0 : limit - Number(requestCount) 
   })
+  
+  client.expire(key, time)
+  
   if(requestCount && Number(requestCount) > limit){
-    res.status(429).json({message: 'Error rate-limit'})
-    return client.expire(key, time)
+    return res.status(429).json({message: 'Error rate-limit'})
   }
   next()
 }
