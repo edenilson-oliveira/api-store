@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import User from '../database/models/user';
 
 import EmailVerify from './EmailVerify'
-import validator from '../utils/validator'
+import validator from '../services/validateInfoAccount'
 import generateTokenUser from '../authentication/GenerateTokenUser';
 import generateRefreshToken from '../authentication/GenerateRefreshToken';
 import SendMail from '../services/mail';

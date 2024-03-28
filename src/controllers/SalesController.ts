@@ -188,6 +188,14 @@ class SalesController{
     
     const { name,description,category,status } = req.body
     
+    const userSalesContact = await client.get(`user-sales-contact-${id}`)
+    
+    const userContact = JSON.parse(userSalesContact || '')
+    
+    if(!userContact || !userContact.email || !userContact.phone){
+      return res.status(400).json({message: 'Error email and phone are required. Confirm in other router'})
+    }
+    
     if(!name || !status){
       return res.status(400).json({message: 'Error name and status infos are required'})
     }

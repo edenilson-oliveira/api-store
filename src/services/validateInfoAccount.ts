@@ -1,5 +1,3 @@
-import { Request,Response,NextFunction } from 'express';
-
 interface Validate{
   isValidate: boolean;
   message?: string;
