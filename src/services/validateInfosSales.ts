@@ -12,7 +12,7 @@ class ValidateInfos{
     this.status = status
   }
   
-  private validateLength(name:string ,description: string,category:string, status: boolean){
+  private validateLength(info:string ,propertyName: string,InfoLength:number){
     if(info.length > InfoLength){
       throw new Error(`The ${propertyName} cannot be longer than ${InfoLength} characters`)
       }
@@ -20,12 +20,15 @@ class ValidateInfos{
     
   public execute(){
     try{
-      this.validateLength(this.name, 'name', 3)
+      this.validateLength(this.name, 'name', 15)
       this.validateLength(this.description, 'description', 120)
       this.validateLength(this.category, 'category', 20)
+      return true
     }
     catch(err){
-      return err
+      return err as any
     }
   }
 }
+
+export default ValidateInfos
