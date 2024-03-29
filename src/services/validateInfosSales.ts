@@ -1,10 +1,10 @@
 class ValidateInfos{
-  name: string
-  description: string
-  category:string
-  status: boolean
+  private name: string
+  private description: string
+  private category:string
+  private status: boolean
   
-  constructor(name:string ,description: string,category:string, status: boolean){
+  constructor(name:string ,description: string,category:string, status: any){
     
     this.name = name,
     this.description = description,
@@ -23,6 +23,11 @@ class ValidateInfos{
       this.validateLength(this.name, 'name', 15)
       this.validateLength(this.description, 'description', 120)
       this.validateLength(this.category, 'category', 20)
+      
+      if(typeof this.status !== 'boolean'){
+        throw new Error('The status property must be of boolean type')
+      }
+      
       return true
     }
     catch(err){
