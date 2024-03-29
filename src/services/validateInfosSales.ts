@@ -20,6 +20,11 @@ class ValidateInfos{
     
   public execute(){
     try{
+      
+      if(!this.name || !this.status){
+      throw new Error('Error name and status infos are required')
+      }
+      
       this.validateLength(this.name, 'name', 15)
       this.validateLength(this.description, 'description', 120)
       this.validateLength(this.category, 'category', 20)

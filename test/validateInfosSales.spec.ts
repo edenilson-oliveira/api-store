@@ -8,6 +8,18 @@ describe('Test of validate infos sales', () => {
     expect(validateInfos).toBe(true)
   })
   
+  it('should return error when name is not add', () => {
+    const validateInfos = new ValidateInfos('','This a big company', 'electronics',true).execute()
+    
+    expect(validateInfos.message).toBe('Error name and status infos are required')
+  })
+  
+  it('should return error when status is not add', () => {
+    const validateInfos = new ValidateInfos('company','This a big company', 'electronics','').execute()
+    
+    expect(validateInfos.message).toBe('Error name and status infos are required')
+  })
+  
   it('should return error in validate of length name', () => {
     const validateInfos = new ValidateInfos('Lorem ipsum dolor sit amet, consectetur adipiscing elit','This a big company', 'electronics',true).execute()
     

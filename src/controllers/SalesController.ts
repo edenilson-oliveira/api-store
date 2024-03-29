@@ -4,6 +4,7 @@ import verifyTokenUser from '../authentication/VerifyToken';
 import SendMail from '../services/mail';
 import SendSms from '../services/sendSms'
 import CodeGenerate from '../services/codeGenerate';
+import ValidateInfos from '../services/validateInfosSales';
 import client from '../redisConfig'
 
 class SalesController{
@@ -186,18 +187,31 @@ class SalesController{
       return
     }
     
-    const { name,description,category,status } = req.body
+    const { name,description,category } = req.body
     
-    const userSalesContact = await client.get(`user-sales-contact-${id}`)
+    const userSalesContact = await client.get(`user-sales-contact-${id}`) || ''
     
-    const userContact = JSON.parse(userSalesContact || '')
+    const userContact = userSalesContact ? JSON.parse(userSalesContact): userSalesContact
     
     if(!userContact || !userContact.email || !userContact.phone){
       return res.status(400).json({message: 'Error email and phone are required. Confirm in other router'})
     }
     
-    if(!name || !status){
-      return res.status(400).json({message: 'Error name and status infos are required'})
+    const status = req.body.status === 'true' || req.body.status === 'false' ? 
+      Boolean(req.body.status)
+      :
+      req.body.status 
+    
+    const validateInfos = new ValidateInfos(
+        name || '',
+        description || '',
+        category || '',
+        status || ''
+      ).execute()
+    
+    
+    if(validateInfos.message){
+      return res.status(400).json({message: validateInfos.message})
     }
     
     res.status(200).end()
