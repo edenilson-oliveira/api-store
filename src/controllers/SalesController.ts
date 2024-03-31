@@ -180,41 +180,59 @@ class SalesController{
   }
   
   public async AddInfoStore(req: Request,res: Response){
-    const verifyToken = verifyTokenUser.execute(req,res)
-    const id = verifyToken.userId
+    try{
+      const verifyToken = verifyTokenUser.execute(req,res)
+      const id = verifyToken.userId
+        
+      if(!verifyToken.auth){
+        return
+      }
       
-    if(!verifyToken.auth){
-      return
+      const { name,description,category } = req.body
+      
+      const userSalesContact = await client.get(`user-sales-contact-${id}`) || ''
+      
+      const userContact = userSalesContact ? JSON.parse(userSalesContact): userSalesContact
+      
+      if(!userContact || !userContact.email || !userContact.phone){
+        return res.status(400).json({message: 'Error email and phone are required. Confirm in other router'})
+      }
+      
+      const status = req.body.status === 'true' || req.body.status === 'false' ? 
+        Boolean(req.body.status)
+        :
+        req.body.status 
+      
+      const validateInfos = new ValidateInfos(
+          name || '',
+          description || '',
+          category || '',
+          status || ''
+        ).execute()
+      
+      
+      if(validateInfos.message){
+        return res.status(400).json({message: validateInfos.message})
+      }
+      
+      const user = {
+        userId: id,
+        emailStore: userContact.email,
+        phone: userContact.phone,
+        storeName: name,
+        category: category || '',
+        description,
+        status
+      }
+      
+     await Sales.create(user)
+        
+      res.status(200).json({message: 'Sales account created with successfully'})
+      
     }
-    
-    const { name,description,category } = req.body
-    
-    const userSalesContact = await client.get(`user-sales-contact-${id}`) || ''
-    
-    const userContact = userSalesContact ? JSON.parse(userSalesContact): userSalesContact
-    
-    if(!userContact || !userContact.email || !userContact.phone){
-      return res.status(400).json({message: 'Error email and phone are required. Confirm in other router'})
+    catch{
+      res.status(501).json({message: 'Internal server error'})
     }
-    
-    const status = req.body.status === 'true' || req.body.status === 'false' ? 
-      Boolean(req.body.status)
-      :
-      req.body.status 
-    
-    const validateInfos = new ValidateInfos(
-        name || '',
-        description || '',
-        category || '',
-        status || ''
-      ).execute()
-    
-    
-    if(validateInfos.message){
-      return res.status(400).json({message: validateInfos.message})
-    }
-    
-    res.status(200).end()
   }
 }
 
