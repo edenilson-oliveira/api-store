@@ -1,7 +1,7 @@
 import { Request,Response,NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import User from '../database/models/user';
-import EmailVerify from './EmailVerify'
+import EmailVerify from '../repository/EmailVerify'
 import validator from '../services/validateInfoAccount'
 import generateTokenUser from '../authentication/GenerateTokenUser';
 import verifyTokenUser from '../authentication/VerifyToken';
