@@ -18,7 +18,7 @@ class InfoSalesVerify{
   }
   
   public async getInfoOnCache(){
-    const userSalesInfo = await client.get(`user-sales-info-${this.id}`) || ''
+    const userSalesInfo = await client.get('user-sales-info') || ''
     
     return userSalesInfo ? JSON.parse(userSalesInfo) : false
   }
@@ -31,10 +31,10 @@ class InfoSalesVerify{
           if(this.id === value.id){
             throw new Error('Your account sales already exist')
           }
-          if(this.email === value.phone){
+          if(this.email === value.email){
             throw new Error('Email sales already exist')
           }
-          if(this.email === value.phone){
+          if(this.phone === value.phone){
             throw new Error('Phone number sales already exist')
           }
         })
