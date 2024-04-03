@@ -4,7 +4,8 @@ import verifyTokenUser from '../authentication/VerifyToken';
 import SendMail from '../services/mail';
 import SendSms from '../services/sendSms'
 import CodeGenerate from '../services/codeGenerate';
-import ValidateSellerAccountInfo from '../services/validateSellerAccountInfo';
+import ValidateSellerAccountInfo from '../services/validateSellerAccountInfo'
+import VerifySellerAccount from '../repository/VerifySellerAccountInfo'
 import client from '../redisConfig'
 
 class SellerAccountController{
@@ -225,7 +226,15 @@ class SellerAccountController{
         status
       }
       
-     await seller.create(user)
+      const verifySellerAccount = new VerifySellerAccount(id as number,user.emailStore,user.phone)
+      
+      const verify = await verifySellerAccount.verifyInfoSeller()
+      
+      if(verify){
+        return res.status(400).json({message: verify.message})
+      }
+      
+      await seller.create(user)
         
       res.status(200).json({message: 'seller account created with successfully'})
       
