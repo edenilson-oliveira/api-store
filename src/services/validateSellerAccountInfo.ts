@@ -1,4 +1,4 @@
-class ValidateInfos{
+class ValidateSellerAccountInfo{
   private name: string
   private description: string
   private category:string
@@ -41,4 +41,4 @@ class ValidateInfos{
   }
 }
 
-export default ValidateInfos
+export default ValidateSellerAccountInfo

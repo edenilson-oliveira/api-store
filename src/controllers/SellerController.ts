@@ -1,13 +1,13 @@
 import { Request,Response,NextFunction } from 'express';
-import Sales from '../database/models/sales';
+import seller from '../database/models/seller';
 import verifyTokenUser from '../authentication/VerifyToken';
 import SendMail from '../services/mail';
 import SendSms from '../services/sendSms'
 import CodeGenerate from '../services/codeGenerate';
-import ValidateInfos from '../services/validateInfosSales';
+import ValidateSellerAccountInfo from '../services/validateSellerAccountInfo';
 import client from '../redisConfig'
 
-class SalesController{
+class SellerAccountController{
   public async AddEmailStore(req: Request,res: Response){
     try{
       
@@ -25,13 +25,13 @@ class SalesController{
       const emailIsValide = validateEmail.exec(email)
       
       if(emailIsValide){
-        const salesEmail = await Sales.findAll({
+        const sellerEmail = await seller.findAll({
           where: {
             emailStore: email
           }
         })
         
-        if(salesEmail.length > 0){
+        if(sellerEmail.length > 0){
           return res.status(409).json({message: 'Email already exist'})
         }
         
@@ -39,14 +39,14 @@ class SalesController{
         
         const sendMail = new SendMail(email,'Confirm Email', `
         <h1>Api Store</h1>
-        <p>Confirm your email with code ${code} for to create account of sales</p>
+        <p>Confirm your email with code ${code} for to create seller account</p>
         `).execute()
         
-        const userSalesEmail = { email, code }
+        const userSellerEmail = { email, code }
         
-        client.set(`user-sales-email-${id}`, JSON.stringify(userSalesEmail))
+        client.set(`user-seller-email-${id}`, JSON.stringify(userSellerEmail))
         
-        client.expire(`user-sales-email-${id}`, 60)
+        client.expire(`user-seller-email-${id}`, 60)
         
         
         return res.status(200).json('Confirm your email')
@@ -59,7 +59,7 @@ class SalesController{
     }
   }
   
-  public async confirmEmailSales(req: Request,res: Response){
+  public async confirmEmailSeller(req: Request,res: Response){
     const verifyToken = verifyTokenUser.execute(req,res)
     const id = verifyToken.userId
       
@@ -69,7 +69,7 @@ class SalesController{
       
     const userCode = req.body.code
       
-    const userInfo  = await client.get(`user-sales-email-${id}`) || ''
+    const userInfo  = await client.get(`user-seller-email-${id}`) || ''
       
     if(!userInfo){
       return res.status(404).end()
@@ -78,13 +78,13 @@ class SalesController{
     const { code, email } = JSON.parse(userInfo)
       
     if(userCode === code){
-      const userContact  = await client.get(`user-sales-contact-${id}`) || ''
+      const userContact  = await client.get(`user-seller-contact-${id}`) || ''
       
-      const userSalesContact = { email, phone: userContact ? JSON.parse(userContact).phone: ''} 
+      const usersellerContact = { email, phone: userContact ? JSON.parse(userContact).phone: ''} 
       
-      client.set(`user-sales-contact-${id}`, JSON.stringify(userSalesContact))
-      client.expire(`user-sales-contact-${id}`, 60 * 60 * 24)
-      client.del(`user-sales-email-${id}`)
+      client.set(`user-seller-contact-${id}`, JSON.stringify(usersellerContact))
+      client.expire(`user-seller-contact-${id}`, 60 * 60 * 24)
+      client.del(`user-seller-email-${id}`)
       
       return res.status(200).json({ message: 'Email confirmed successfully'})
     }
@@ -107,19 +107,19 @@ class SalesController{
       const phoneIsValide = validatePhone.exec(phone)
       
       if(phoneIsValide){
-        const salesPhone = await Sales.findAll({
+        const sellerPhone = await seller.findAll({
           where: {
             phone
           }
         })
         
-        if(salesPhone.length > 0){
+        if(sellerPhone.length > 0){
           return res.status(409).json({message: 'Phone number already exist'})
         }
         
         const code = new CodeGenerate().execute()
         
-        const userSalesPhone = { phone, code }
+        const userSellerPhone = { phone, code }
         
         const sendSms = new SendSms(`Confirm your phone number with code ${code}`, phone)
         const send = await sendSms.execute()
@@ -128,9 +128,9 @@ class SalesController{
           return res.status(400).json({message: send})
         }
         
-        client.set(`user-sales-phone-${id}`, JSON.stringify(userSalesPhone))
+        client.set(`user-seller-phone-${id}`, JSON.stringify(userSellerPhone))
         
-        client.expire(`user-sales-phone-${id}`, 60)
+        client.expire(`user-seller-phone-${id}`, 60)
         
         return res.status(200).json('Confirm your phone number')
       }
@@ -142,7 +142,7 @@ class SalesController{
     }
   }
   
-  public async confirmPhoneSales(req: Request,res: Response){
+  public async confirmPhoneSeller(req: Request,res: Response){
     const verifyToken = verifyTokenUser.execute(req,res)
     const id = verifyToken.userId
       
@@ -152,7 +152,7 @@ class SalesController{
       
     const userCode = req.body.code
       
-    const userInfo  = await client.get(`user-sales-phone-${id}`) || ''
+    const userInfo  = await client.get(`user-seller-phone-${id}`) || ''
       
     if(!userInfo){
       return res.status(404).end()
@@ -161,17 +161,17 @@ class SalesController{
     const { code, phone } = JSON.parse(userInfo)
       
     if(userCode === code){
-      const userContact  = await client.get(`user-sales-contact-${id}`) || ''
+      const userContact  = await client.get(`user-seller-contact-${id}`) || ''
       
-      const userSalesContact = {
+      const userSellerContact = {
         email: userContact ? JSON.parse(userContact).email: '',
         phone 
         
       } 
       
-      client.set(`user-sales-contact-${id}`, JSON.stringify(userSalesContact))
-      client.expire(`user-sales-contact-${id}`, 60 * 60 * 24)
-      client.del(`user-sales-phone-${id}`)
+      client.set(`user-seller-contact-${id}`, JSON.stringify(userSellerContact))
+      client.expire(`user-seller-contact-${id}`, 60 * 60 * 24)
+      client.del(`user-seller-phone-${id}`)
       
       return res.status(200).json({ message: 'Phone number confirmed successfully'})
     }
@@ -190,9 +190,9 @@ class SalesController{
       
       const { name,description,category } = req.body
       
-      const userSalesContact = await client.get(`user-sales-contact-${id}`) || ''
+      const userSellerContact = await client.get(`user-seller-contact-${id}`) || ''
       
-      const userContact = userSalesContact ? JSON.parse(userSalesContact): userSalesContact
+      const userContact = userSellerContact ? JSON.parse(userSellerContact): userSellerContact
       
       if(!userContact || !userContact.email || !userContact.phone){
         return res.status(400).json({message: 'Error email and phone are required. Confirm in other router'})
@@ -203,7 +203,7 @@ class SalesController{
         :
         req.body.status 
       
-      const validateInfos = new ValidateInfos(
+      const validateInfos = new ValidateSellerAccountInfo(
           name || '',
           description || '',
           category || '',
@@ -225,9 +225,9 @@ class SalesController{
         status
       }
       
-     await Sales.create(user)
+     await seller.create(user)
         
-      res.status(200).json({message: 'Sales account created with successfully'})
+      res.status(200).json({message: 'seller account created with successfully'})
       
     }
     catch{
@@ -236,4 +236,4 @@ class SalesController{
   }
 }
 
-export default new SalesController
+export default new SellerAccountController

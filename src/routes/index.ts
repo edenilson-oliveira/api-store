@@ -2,13 +2,13 @@ import express from 'express';
 import login from './login'
 import accountUser from './accoutUser'
 import refreshToken from './refreshToken'
-import sales from './sales'
+import seller from './seller'
 
 const router = express.Router()
 
 router.use(login)
 router.use(accountUser)
 router.use(refreshToken)
-router.use(sales)
+router.use(seller)
 
 export default router

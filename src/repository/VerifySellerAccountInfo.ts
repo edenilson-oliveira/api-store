@@ -1,12 +1,12 @@
 import client from '../redisConfig';
 
-type UserSalesInfo = {
+type UserSellerInfo = {
   id: number;
   email: string;
   phone: string;
 }
 
-class InfoSalesVerify{
+class VerifySellerAccount{
   private readonly id: number
   private readonly  email: string
   private readonly phone: string
@@ -19,19 +19,19 @@ class InfoSalesVerify{
   
   public async getInfoOnCache(){
     
-    const userSalesInfo = await client.get('user-sales-info') || ''
+    const userSellerInfo = await client.get('user-seller-info') || ''
     
-    return userSalesInfo ? JSON.parse(userSalesInfo) : false
+    return userSellerInfo ? JSON.parse(userSellerInfo) : false
   }
   
-  public async verifyInfoUser(){
+  public async verifyInfoSeller(){
     const userInfo = await this.getInfoOnCache()
     try{
       if(userInfo){
-        userInfo.map((value: UserSalesInfo) => {
+        userInfo.map((value: UserSellerInfo) => {
           
           if(this.id === value.id){
-            throw new Error('Your account sales already exist')
+            throw new Error('Your account seller already exist')
           }
           if(this.email === value.email){
             throw new Error('Email sales already exist')
@@ -53,4 +53,4 @@ class InfoSalesVerify{
   }
 }
 
-export default InfoSalesVerify
+export default VerifySellerAccount
