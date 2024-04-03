@@ -21,7 +21,8 @@ describe('Test of get info sales cache', () => {
     })
     
     it('should return false', async () => {
-      
+      const infoAccountSeller = await client.get('user-sales-info')
+      await client.del('user-sales-info')
       const infoSalesVerify = new InfoSalesVerify(10,'teste@example.com','123456789')
       const infoOnCache = await infoSalesVerify.getInfoOnCache()
       
@@ -31,6 +32,11 @@ describe('Test of get info sales cache', () => {
 
 
   describe('Test of info sales verify', () => {
+    
+    beforeAll(async () => {
+    await client.set('user-sales-info',JSON.stringify([{id: 1,email: 'teste@example.com', phone: '123456789'}]))
+  })
+    
     it('should return sucess in verify of info users', async () => {
       const infoSalesVerify = new InfoSalesVerify(10,'teste1@example.com','12345678910')
       
@@ -40,7 +46,7 @@ describe('Test of get info sales cache', () => {
     })
     
     it('should return error in verify of id', async () => {
-      const infoSalesVerify = new InfoSalesVerify(2,'teste1@example.com','12345678910')
+      const infoSalesVerify = new InfoSalesVerify(1,'teste1@example.com','12345678910')
       
       const verify = await infoSalesVerify.verifyInfoUser()
       
@@ -48,12 +54,21 @@ describe('Test of get info sales cache', () => {
     })
     
     it('should return error in verify of email', async () => {
-      const infoSalesVerify = new InfoSalesVerify(1,'teste@example.com','12345678910')
+      const infoSalesVerify = new InfoSalesVerify(2,'teste@example.com','12345678910')
       
       const verify = await infoSalesVerify.verifyInfoUser()
       
       expect(verify.message).toMatch(/Email/)
     })
+    
+    it('should return error in verify of phone number', async () => {
+      const infoSalesVerify = new InfoSalesVerify(2,'teste1@example.com','123456789')
+      
+      const verify = await infoSalesVerify.verifyInfoUser()
+      
+      expect(verify.message).toMatch(/Phone/)
+    })
+    
   })
   
 })

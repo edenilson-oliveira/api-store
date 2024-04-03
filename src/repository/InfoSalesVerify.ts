@@ -18,6 +18,7 @@ class InfoSalesVerify{
   }
   
   public async getInfoOnCache(){
+    
     const userSalesInfo = await client.get('user-sales-info') || ''
     
     return userSalesInfo ? JSON.parse(userSalesInfo) : false
@@ -28,6 +29,7 @@ class InfoSalesVerify{
     try{
       if(userInfo){
         userInfo.map((value: UserSalesInfo) => {
+          
           if(this.id === value.id){
             throw new Error('Your account sales already exist')
           }
