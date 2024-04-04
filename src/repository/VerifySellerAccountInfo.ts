@@ -1,6 +1,6 @@
 import client from '../redisConfig';
 
-type UserSellerInfo = {
+interface UserSellerInfo{
   id: number;
   email: string;
   phone: string;
@@ -53,4 +53,4 @@ class VerifySellerAccount{
   }
 }
 
-export default VerifySellerAccount
+export default VerifySellerAccount 
