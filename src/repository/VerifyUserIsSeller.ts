@@ -1,10 +1,5 @@
-import client from '../redisConfig';
-
-interface UserSellerInfo{
-  id: number;
-  email: string;
-  phone: string;
-}
+import UserSellerInfo from './SellerInfoOnCache'
+import SellerInfoOnCache from './SellerInfoOnCache'
 
 class VerifyUserIsSeller{
   private readonly id: number
@@ -14,12 +9,11 @@ class VerifyUserIsSeller{
   }
   
   public async execute(){
-    const userSellerInfo = await client.get('user-seller-info') || ''
+    const sellerInfo = await (new SellerInfoOnCache()).getInfo()
     
-    const sellerInfo = JSON.parse(userSellerInfo)
     
-    const verify = sellerInfo.some((value 
-    :UserSellerInfo) => this.id === value.id)
+    const verify = sellerInfo.length > 0 ? sellerInfo.some((value 
+    :UserSellerInfo) => this.id === value.id) : sellerInfo
     
     if(verify){
       return true
