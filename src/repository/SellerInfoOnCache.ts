@@ -12,14 +12,14 @@ export default class SellerInfoOnCache{
     const sellerInfo = await this.getInfo()
       
     const data = sellerInfo.push(info)
-      
-    await client.set('user-seller-info',  JSON.stringify(data))
+  
+    await client.set('user-seller-info',  JSON.stringify(sellerInfo))
   }
   
   public async getInfo(): Promise<UserSellerInfo[]> {
     const sellerInfo = await client.get('user-seller-info') || ''
     
-    return sellerInfo ? JSON.parse(sellerInfo) : [{id: 0,email: '',phone: ''}]
+    return sellerInfo ? JSON.parse(sellerInfo) : []
   }
   
 }

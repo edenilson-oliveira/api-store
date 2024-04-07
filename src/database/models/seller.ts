@@ -2,7 +2,7 @@ import { Model } from 'sequelize';
 import sequelize from 'sequelize';
 import db from '.';
 
-class Sales extends Model{
+class Seller extends Model{
   declare id: number
   declare userId: number
   declare storeName: string
@@ -16,7 +16,7 @@ class Sales extends Model{
   declare updatedAt: Date
 }
 
-Sales.init({
+Seller.init({
   id: {
     type: sequelize.INTEGER,
     autoIncrement: true,
@@ -62,8 +62,8 @@ Sales.init({
   }
 },{
   sequelize: db,
-  tableName: 'sales',
+  tableName: 'seller',
   timestamps: true,
 })
 
-export default Sales
+export default Seller

@@ -1,12 +1,13 @@
 import { Request,Response,NextFunction } from 'express';
-import seller from '../database/models/seller';
+import Seller from '../database/models/seller';
 import verifyTokenUser from '../authentication/VerifyToken';
 import SendMail from '../services/mail';
-import SendSms from '../services/sendSms'
+import SendSms from '../services/sendSms';
 import CodeGenerate from '../services/codeGenerate';
-import ValidateSellerAccountInfo from '../services/validateSellerAccountInfo'
-import VerifySellerAccount from '../repository/VerifySellerAccountInfo'
-import client from '../redisConfig'
+import ValidateSellerAccountInfo from '../services/validateSellerAccountInfo';
+import VerifySellerAccount from '../repository/VerifySellerAccountInfo';
+import SellerInfoOnCache from '../repository/SellerInfoOnCache';
+import client from '../redisConfig';
 
 class SellerAccountController{
   public async AddEmailStore(req: Request,res: Response){
@@ -26,7 +27,7 @@ class SellerAccountController{
       const emailIsValide = validateEmail.exec(email)
       
       if(emailIsValide){
-        const sellerEmail = await seller.findAll({
+        const sellerEmail = await Seller.findAll({
           where: {
             emailStore: email
           }
@@ -108,7 +109,7 @@ class SellerAccountController{
       const phoneIsValide = validatePhone.exec(phone)
       
       if(phoneIsValide){
-        const sellerPhone = await seller.findAll({
+        const sellerPhone = await Seller.findAll({
           where: {
             phone
           }
@@ -138,7 +139,8 @@ class SellerAccountController{
       
       res.status(400).json({message: 'Phone number is not valid'})
     }
-    catch{
+    catch(err){
+      console.log(err)
       res.status(500).json({message: 'Internal server error'})
     }
   }
@@ -234,8 +236,17 @@ class SellerAccountController{
         return res.status(400).json({message: verify.message})
       }
       
-      await seller.create(user)
-        
+      await Seller.create(user)
+      
+      const sellerInfo = new SellerInfoOnCache()
+    
+      const sellerInfoCreate = await sellerInfo.add({
+          id,
+          email: user.emailStore,
+          phone: user.phone
+      })
+    
+      
       res.status(200).json({message: 'seller account created with successfully'})
       
     }

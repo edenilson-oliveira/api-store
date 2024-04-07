@@ -14,7 +14,19 @@ describe('Test of seller info on cache', () => {
     
     const sellerInfoCreate = await sellerInfo.add({id: 0,email: 'teste@example.com',phone: '123456789'})
     
+    
     expect(sellerInfoCreate).toBeUndefined()
+    
+  })
+  
+  it('should return seller info', async () => {
+    const sellerInfo = new SellerInfoOnCache()
+    
+    const getSellerInfo = await sellerInfo.getInfo()
+    
+    expect(getSellerInfo[0]).toHaveProperty('id',0)
+    expect(getSellerInfo[0]).toHaveProperty('email','teste@example.com')
+    expect(getSellerInfo[0]).toHaveProperty('phone','123456789')
   })
   
 })
