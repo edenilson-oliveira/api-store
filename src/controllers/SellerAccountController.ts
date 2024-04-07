@@ -1,20 +1,38 @@
 import { Request,Response } from 'express';
+import Seller from '../database/models/seller';
 import verifyTokenUser from '../authentication/VerifyToken';
 import VerifyUserIsSeller from '../repository/VerifyUserIsSeller'
 
 class SellerAccountController{
   public async GetInfoSellerAccount(res: Response,req: Request){
-    const verifyToken = verifyTokenUser.execute(req,res)
-      const id = verifyToken.userId
+    try{
+      const verifyToken = verifyTokenUser.execute(req,res)
+        const id = verifyToken.userId || 0
+        
+      if(!verifyToken.auth){
+        return
+      }
       
-    if(!verifyToken.auth){
-      return
+      const verifyUserIsSeller = new VerifyUserIsSeller(id)
+      
+      const verify = await verifyUserIsSeller.execute()
+      
+      if(typeof verify === 'string'){
+        return res.status(403).json({message: verify})
+      }
+      
+      const sellerInfo = await Seller.findAll({
+          where: {
+            userId: id
+          }
+        })
+        
+      res.status(200).json({sellerInfo})
     }
-    
-    const verifyUserIsSeller = new VerifyUserIsSeller(id)
-    
-    const verify = await verifyUserIsSeller.execute()
-    
+  
+  catch{
+    res.status(500).json({message: 'Internal server error'})
+    }
   }
 }
 

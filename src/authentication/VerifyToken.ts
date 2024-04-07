@@ -23,8 +23,8 @@ class VerifyToken{
     return this.BearerHeaderData
   }
   
-  public TokenOnBearerHeader(req: Request,res: Response) {
-    const bearerHeader = req.headers['authorization']
+  public TokenOnBearerHeader(headers: any) {
+    const bearerHeader = headers.hasOwnProperty('authorization') ? headers.authorization : ''
     
     if(bearerHeader){
       const token = bearerHeader.split('Bearer ')[1]
@@ -47,8 +47,9 @@ class VerifyToken{
   
   
   public execute(req: Request,res: Response): Auth{
-      this.TokenOnBearerHeader(req,res)
+      this.TokenOnBearerHeader(req.headers)
       const { exist } =  this.BearerHeaderData
+      
       if(exist){
         const { token } = this.BearerHeaderData
         const verifyToken = this.getTokenOnly(token)

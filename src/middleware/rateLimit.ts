@@ -4,7 +4,7 @@ import verifyToken from '../authentication/VerifyToken';
 import client from '../redisConfig'
 
 const rateLimit = (resource: string, limit=10,time=60) => async (req: Request,res: Response,next: NextFunction) => {
-  verifyToken.TokenOnBearerHeader(req,res)
+  verifyToken.TokenOnBearerHeader(req.headers)
   const { token } = verifyToken.getBearerHeaderData()
   const verifyTokenUser = verifyToken.getTokenOnly(token)
   const id = Number(verifyTokenUser.id)

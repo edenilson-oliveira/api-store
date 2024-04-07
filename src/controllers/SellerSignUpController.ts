@@ -139,8 +139,7 @@ class SellerAccountController{
       
       res.status(400).json({message: 'Phone number is not valid'})
     }
-    catch(err){
-      console.log(err)
+    catch{
       res.status(500).json({message: 'Internal server error'})
     }
   }
@@ -251,7 +250,7 @@ class SellerAccountController{
       
     }
     catch{
-      res.status(501).json({message: 'Internal server error'})
+      res.status(500).json({message: 'Internal server error'})
     }
   }
 }
