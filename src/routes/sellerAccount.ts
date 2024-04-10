@@ -1,4 +1,3 @@
-
 import express from 'express';
 import sellerAccountController from '../controllers/SellerAccountController';
 import rateLimit from '../middleware/rateLimit';

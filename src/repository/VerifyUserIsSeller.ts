@@ -11,9 +11,8 @@ class VerifyUserIsSeller{
   public async execute(){
     const sellerInfo = await (new SellerInfoOnCache()).getInfo()
     
-    
     const verify = sellerInfo.length > 0 ? sellerInfo.some((value 
-    :UserSellerInfo) => this.id === value.id) : sellerInfo
+    :UserSellerInfo) => this.id === value.id) : false
     
     if(verify){
       return true

@@ -24,14 +24,13 @@ class VerifyToken{
   }
   
   public TokenOnBearerHeader(headers: any) {
-    const bearerHeader = headers.hasOwnProperty('authorization') ? headers.authorization : ''
+    const bearerHeader = headers.authorization
     
     if(bearerHeader){
       const token = bearerHeader.split('Bearer ')[1]
       this.BearerHeaderData.token = token
       this.BearerHeaderData.exist = true
     }
-    
   }
   
   public getTokenOnly(token: string,secretKey=process.env.JWT_TOKEN_KEY): TokenUser{

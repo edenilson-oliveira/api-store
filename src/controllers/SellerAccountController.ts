@@ -4,7 +4,7 @@ import verifyTokenUser from '../authentication/VerifyToken';
 import VerifyUserIsSeller from '../repository/VerifyUserIsSeller'
 
 class SellerAccountController{
-  public async GetInfoSellerAccount(res: Response,req: Request){
+  public async GetInfoSellerAccount(req: Request,res: Response){
     try{
       const verifyToken = verifyTokenUser.execute(req,res)
         const id = verifyToken.userId || 0
@@ -30,8 +30,8 @@ class SellerAccountController{
       res.status(200).json({sellerInfo})
     }
   
-  catch{
-    res.status(500).json({message: 'Internal server error'})
+    catch{
+      res.status(500).json({message: 'Internal server error'})
     }
   }
 }
