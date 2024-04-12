@@ -12,13 +12,13 @@ class VerifyUserIsSeller{
     const sellerInfo = await (new SellerInfoOnCache()).getInfo()
     
     const verify = sellerInfo.length > 0 ? sellerInfo.some((value 
-    :UserSellerInfo) => this.id === value.id) : false
+    : UserSellerInfo) => this.id === value.id) : false
     
     if(verify){
       return true
     }
       
-    return 'This account is not seller'
+    return 'This account is not seller account'
   }
 }
 
