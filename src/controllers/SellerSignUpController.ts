@@ -21,10 +21,8 @@ class SellerAccountController{
       }
       
       const { email } = req.body
-        
-      const validateEmail = /^[a-z0-9/./_/-]+@[a-z]+(\.[a-z]+){1,}$/
       
-      const emailIsValide = validateEmail.exec(email)
+      const emailIsValide = new ValidateSellerAccountInfo().validateEmail(email)
       
       if(emailIsValide){
         const sellerEmail = await Seller.findAll({
@@ -104,9 +102,8 @@ class SellerAccountController{
       }
       
       const { phone } = req.body
-      const validatePhone = /[+]{1}[0-9]{13}$/
       
-      const phoneIsValide = validatePhone.exec(phone)
+      const phoneIsValide = new ValidateSellerAccountInfo().validatePhone(phone)
       
       if(phoneIsValide){
         const sellerPhone = await Seller.findAll({

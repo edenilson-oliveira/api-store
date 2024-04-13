@@ -1,15 +1,15 @@
 class ValidateSellerAccountInfo{
-  private name: string
-  private description: string
-  private category:string
-  private status: boolean
   
-  constructor(name:string ,description: string,category:string, status: any){
+  public validateEmail(email: string): boolean{
+    const regexValidateEmail = /^[a-z0-9/./_/-]+@[a-z]+(\.[a-z]+){1,}$/
     
-    this.name = name,
-    this.description = description,
-    this.category = category,
-    this.status = status
+    return Boolean(regexValidateEmail.exec(email))
+  }
+  
+  public validatePhone(phone: string): boolean{
+    const regexValidatePhone = /[+]{1}[0-9]{13}$/
+    
+    return Boolean(regexValidatePhone.exec(phone))
   }
   
   private validateLength(info:string ,propertyName: string,InfoLength:number){
@@ -18,19 +18,19 @@ class ValidateSellerAccountInfo{
       }
     }
     
-  public execute(){
+  public validateInfoAboutStore(name:string ,description: string,category:string, status: any){
     try{
       
-      if(!this.name || !this.status){
+      if(!name || !status){
       throw new Error('Error name and status infos are required')
       }
       
-      this.validateLength(this.name, 'name', 15)
-      this.validateLength(this.description, 'description', 120)
-      this.validateLength(this.category, 'category', 20)
+      this.validateLength(name, 'name', 15)
+      this.validateLength(description, 'description', 120)
+      this.validateLength(category, 'category', 20)
       
-      if(typeof this.status !== 'boolean'){
-        throw new Error('The status property must be of boolean type')
+      if(typeof status !== 'boolean'){
+        throw new Error('The status property must be of boolean type, true or false')
       }
       
       return true
