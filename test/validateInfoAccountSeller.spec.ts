@@ -70,4 +70,30 @@ describe('Test of validate infos sales', () => {
     
     expect(validate.message).toBe('The status property must be of boolean type, true or false')
   })
+  
+  it('should return undefined in validate of all infos', () => {
+    const validate = validateInfos.validateAllInfos('teste@example.com','+5512345678910','Company','This a big company', 'electronics',true)
+    
+    expect(validate).toBeUndefined()
+  })
+  
+  it('should return error in validate of email', () => {
+    const validate = validateInfos.validateAllInfos('Teste@example.com','+5512345678910','Company','This a big company', 'electronics',true)
+    
+    expect(validate).toMatch(/email/)
+  })
+  
+  it('should return error in validate of phone number', () => {
+    const validate = validateInfos.validateAllInfos('teste@example.com','5512345678910','Company','This a big company', 'electronics',true)
+    
+    expect(validate).toMatch(/phone/)
+  })
+  
+  it('should return error in validate of other infos', () => {
+    const validate = validateInfos.validateAllInfos('teste@example.com','+5512345678910','Lorem ipsum dolor sit amet, consectetur adipiscing elit','This a big company', 'electronics',true)
+    
+    expect(validate).toMatch(/name/)
+  })
+  
+  
 })
