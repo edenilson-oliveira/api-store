@@ -1,7 +1,7 @@
 import ValidateSellerAccountInfo from '../src/services/validateSellerAccountInfo';
 
 
-describe('Test of validate infos sales', () => {
+describe('Test of validate seller infos', () => {
   
   const validateInfos = new ValidateSellerAccountInfo()
   

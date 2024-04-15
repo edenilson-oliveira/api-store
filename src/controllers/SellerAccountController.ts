@@ -63,13 +63,15 @@ class SellerAccountController{
       const sellerInfo = sellerInfoOnDb[0].dataValues
         
       const sellerInfoDataToEdit = {
-        name: name  || sellerInfo.storeName,
+        storeName: name  || sellerInfo.storeName,
         status: status  || sellerInfo.status,
-        email: email  || sellerInfo.emailStore,
+        emailStore: email  || sellerInfo.emailStore,
         phone: phone  || sellerInfo.phone,
         category: category  || sellerInfo.category,
         description: description  || sellerInfo.description
       }
+      
+      const validateInfos = new ValidateSellerAccountInfo()
       
       res.status(200).end()
     }
