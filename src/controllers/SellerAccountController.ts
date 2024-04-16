@@ -63,18 +63,16 @@ class SellerAccountController{
       const sellerInfoDataToEdit = {
         storeName: req.body.name  || sellerInfo.storeName,
         status: req.body.status  || sellerInfo.status,
-        emailStore: req.body.email  || sellerInfo.emailStore,
-        phone: req.body.phone  || sellerInfo.phone,
         category: req.body.category  || sellerInfo.category,
         description: req.body.description  || sellerInfo.description
       }
       
       
-      const { emailStore,phone,storeName,description,category,status } = sellerInfoDataToEdit
+      const { storeName,description,category,status } = sellerInfoDataToEdit
       
       const validateInfos = new ValidateSellerAccountInfo()
       
-      const validate = validateInfos.validateAllInfos(emailStore,phone,storeName,description,category,status)
+      const validate = validateInfos.validateInfoAboutStore(storeName,description,category,status)
       
       if(validate){
         return res.status(400).json({message: validate})
