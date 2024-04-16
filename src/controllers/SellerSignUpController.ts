@@ -202,16 +202,16 @@ class SellerAccountController{
         :
         req.body.status 
       
-      const validateInfos = new ValidateSellerAccountInfo(
+      const validateInfos = new ValidateSellerAccountInfo().validateInfoAboutStore(
           name || '',
           description || '',
           category || '',
           status || ''
-        ).execute()
+        )
       
       
-      if(validateInfos.message){
-        return res.status(400).json({message: validateInfos.message})
+      if(validateInfos){
+        return res.status(400).json({message: validateInfos})
       }
       
       const user = {

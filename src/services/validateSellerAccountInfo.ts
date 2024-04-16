@@ -18,7 +18,7 @@ class ValidateSellerAccountInfo{
       }
     }
     
-  public validateInfoAboutStore(name:string ,description: string,category:string, status: any){
+  public validateInfoAboutStore(name:string ,description: string,category:string, status: any): void | string  {
     try{
       
       if(!name || !status){
@@ -32,15 +32,13 @@ class ValidateSellerAccountInfo{
       if(typeof status !== 'boolean'){
         throw new Error('The status property must be of boolean type, true or false')
       }
-      
-      return true
     }
-    catch(err){
-      return err as any
+    catch(err: any){
+      return err.message
     }
   }
   
-  public validateAllInfos(email: string,phone: string,name:string ,description: string,category:string, status: any): string | undefined {
+  public validateAllInfos(email: string,phone: string,name:string ,description: string,category:string, status: any): string | void {
     
     const validateEmail = this.validateEmail(email)
     const validatePhone = this.validatePhone(phone)
@@ -55,8 +53,8 @@ class ValidateSellerAccountInfo{
         throw new Error('Error phone number is not valid')
       }
       
-      if(typeof validateOtherInfos.message === 'string'){
-        throw new Error(validateOtherInfos.message)
+      if(typeof validateOtherInfos === 'string'){
+        throw new Error(validateOtherInfos)
       }
     }
     

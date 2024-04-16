@@ -53,8 +53,6 @@ class SellerAccountController{
         return res.status(401).json({message: verify})
       }
       
-      const { name,description,category,phone,email,status } = req.body
-      
       const sellerInfoOnDb = await Seller.findAll({
           where: {
             userId: id
@@ -63,15 +61,24 @@ class SellerAccountController{
       const sellerInfo = sellerInfoOnDb[0].dataValues
         
       const sellerInfoDataToEdit = {
-        storeName: name  || sellerInfo.storeName,
-        status: status  || sellerInfo.status,
-        emailStore: email  || sellerInfo.emailStore,
-        phone: phone  || sellerInfo.phone,
-        category: category  || sellerInfo.category,
-        description: description  || sellerInfo.description
+        storeName: req.body.name  || sellerInfo.storeName,
+        status: req.body.status  || sellerInfo.status,
+        emailStore: req.body.email  || sellerInfo.emailStore,
+        phone: req.body.phone  || sellerInfo.phone,
+        category: req.body.category  || sellerInfo.category,
+        description: req.body.description  || sellerInfo.description
       }
       
+      
+      const { emailStore,phone,storeName,description,category,status } = sellerInfoDataToEdit
+      
       const validateInfos = new ValidateSellerAccountInfo()
+      
+      const validate = validateInfos.validateAllInfos(emailStore,phone,storeName,description,category,status)
+      
+      if(validate){
+        return res.status(400).json({message: validate})
+      }
       
       res.status(200).end()
     }

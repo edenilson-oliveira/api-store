@@ -25,7 +25,7 @@ class LoginUserControler{
       
       const {firstName,lastName,email,password} = req.body
       
-      const validate = ValidateUserAccountInfo(req.body).execute()
+      const validate = new ValidateUserAccountInfo(req.body).execute()
       
       const emailVerify = new EmailVerify(email || '')
       

@@ -151,7 +151,7 @@ class UserAccountController{
         
         
       
-        const validate = ValidateUserAccountInfo(user).execute()
+        const validate = new ValidateUserAccountInfo(user).execute()
         
         if(validate.isValidate && !isEmailExists){
           if(userPassword === userInfo.password && user.email === userInfo.email){
