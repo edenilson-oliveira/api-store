@@ -37,31 +37,6 @@ class ValidateSellerAccountInfo{
       return err.message
     }
   }
-  
-  public validateAllInfos(email: string,phone: string,name:string ,description: string,category:string, status: any): string | void {
-    
-    const validateEmail = this.validateEmail(email)
-    const validatePhone = this.validatePhone(phone)
-    const validateOtherInfos = this.validateInfoAboutStore(name,description,category,status)
-    
-    try{
-      if(!validateEmail){
-        throw new Error('Error email is not valid')
-      }
-      
-      if(!validatePhone){
-        throw new Error('Error phone number is not valid')
-      }
-      
-      if(typeof validateOtherInfos === 'string'){
-        throw new Error(validateOtherInfos)
-      }
-    }
-    
-    catch(err: any){
-      return err.message
-    }
-  }
 }
 
 export default ValidateSellerAccountInfo
