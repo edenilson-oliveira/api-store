@@ -11,52 +11,45 @@ import client from '../redisConfig';
 
 class SellerAccountController{
   public async AddEmailStore(req: Request,res: Response){
-    try{
+    const verifyToken = verifyTokenUser.execute(req,res)
+    const id = verifyToken.userId
       
-      const verifyToken = verifyTokenUser.execute(req,res)
-      const id = verifyToken.userId
-      
-      if(!verifyToken.auth){
+    if(!verifyToken.auth){
         return
       }
       
-      const { email } = req.body
+    const { email } = req.body
       
-      const emailIsValide = new ValidateSellerAccountInfo().validateEmail(email)
+    const emailIsValide = new ValidateSellerAccountInfo().validateEmail(email)
       
-      if(emailIsValide){
-        const sellerEmail = await Seller.findAll({
-          where: {
-            emailStore: email
-          }
-        })
+    if(emailIsValide){
         
-        if(sellerEmail.length > 0){
-          return res.status(409).json({message: 'Email already exist'})
-        }
+      const verifySellerAccount = new VerifySellerAccount(id as number,email,'')
+      
+      const verify = await verifySellerAccount.verifyInfoSeller()
         
-        const code = new CodeGenerate().execute()
+      if(verify){
+        return res.status(409).json({message: verify.message})
+      }
+
+      const code = new CodeGenerate().execute()
         
-        const sendMail = new SendMail(email,'Confirm Email', `
+      const sendMail = new SendMail(email,'Confirm Email', `
         <h1>Api Store</h1>
         <p>Confirm your email with code ${code} for to create seller account</p>
         `).execute()
         
-        const userSellerEmail = { email, code }
+      const userSellerEmail = { email, code }
         
-        client.set(`user-seller-email-${id}`, JSON.stringify(userSellerEmail))
+      client.set(`user-seller-email-${id}`, JSON.stringify(userSellerEmail))
         
-        client.expire(`user-seller-email-${id}`, 60)
+      client.expire(`user-seller-email-${id}`, 60)
         
         
-        return res.status(200).json('Confirm your email')
-      }
+      return res.status(200).json('Confirm your email')
+    }
       
-      res.status(400).json({message: 'Email is not valid'})
-    }
-  catch{
-    res.status(500).json({message: 'Internal server error'})
-    }
+    res.status(400).json({message: 'Email is not valid'})
   }
   
   public async confirmEmailSeller(req: Request,res: Response){
@@ -105,16 +98,14 @@ class SellerAccountController{
       
       const phoneIsValide = new ValidateSellerAccountInfo().validatePhone(phone)
       
-      if(phoneIsValide){
-        const sellerPhone = await Seller.findAll({
-          where: {
-            phone
-          }
-        })
+      if(phoneIsValide){const verifySellerAccount = new VerifySellerAccount(id as number,'',phone)
+      
+        const verify = await verifySellerAccount.verifyInfoSeller()
         
-        if(sellerPhone.length > 0){
-          return res.status(409).json({message: 'Phone number already exist'})
+        if(verify){
+          return res.status(409).json({message: verify.message})
         }
+        
         
         const code = new CodeGenerate().execute()
         
