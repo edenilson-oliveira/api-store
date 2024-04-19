@@ -3,43 +3,53 @@ import UserSellerInfo from './SellerInfoOnCache';
 import SellerInfoOnCache from './SellerInfoOnCache';
 
 class VerifySellerAccount{
-  private readonly id: number
-  private readonly  email: string
-  private readonly phone: string
   
-  constructor(id: number, email: string,phone: string){
-    this.id = id,
-    this.email = email,
-    this.phone = phone
+  private sellerInfo: SellerInfoOnCache
+  private userInfo: UserSellerInfo[]
+  
+  constructor(){
+    this.sellerInfo = new SellerInfoOnCache()
+    this.userInfo = [{id: -1,email: '',phone: ''}] as UserSellerInfo[]
+    
+    this.start()
   }
   
-  public async verifyInfoSeller(){
-    const sellerInfo = new SellerInfoOnCache()
-    const userInfo = await sellerInfo.getInfo()
+  private async start(){
+    this.userInfo = await this.sellerInfo.getInfo()
+  }
+  
+  public async verifyIdSeler(id: number): Promise<string | void>{
+  
+    console.log(this.userInfo)
     
-    try{
-      if(userInfo.length > 0){
-        userInfo.map((value: UserSellerInfo) => {
-          
-          if(this.id === value.id){
-            throw new Error('Your account seller already exist')
-          }
-          if(this.email === value.email){
-            throw new Error('Email sales already exist')
-          }
-          if(this.phone === value.phone){
-            throw new Error('Phone number sales already exist')
-          }
-        })
-        
-        return
-      }
-      
-      return false
+    if(this.userInfo.length > 0){
+      this.userInfo.map((value: UserSellerInfo) => {
+        if(id === value.id){
+          return 'Your account seller already exist'
+        }
+      })
     }
+  }
+  
+  public async verifyEmailSeler(email: string): Promise<string | void>{
     
-    catch(err){
-      return err as any
+    if(this.userInfo.length > 0){
+      this.userInfo.map((value: UserSellerInfo) => {
+        if(email === value.email){
+          return 'Email seller already exist'
+        }
+      })
+    }
+  }
+  
+  public async verifyPhoneSeler(phone: string): Promise<string | void>{
+    
+    if(this.userInfo.length > 0){
+      this.userInfo.map((value: UserSellerInfo) => {
+        if(phone === value.phone){
+          return 'Phone number sales already exist'
+        }
+      })
     }
   }
 }

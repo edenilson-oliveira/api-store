@@ -14,35 +14,53 @@ describe('Test verify seller account info', () => {
     await client.set('user-seller-info',JSON.stringify([{id: 1,email: 'teste@example.com', phone: '123456789'}]))
   })
     
-  it('should return sucess in verify of info users', async () => {
-    const verifySellerAccount = new VerifySellerAccount(10,'teste1@example.com','12345678910')
+  it('should return sucess in verify of id', async () => {
+    const verifySellerAccount = new VerifySellerAccount()
       
-    const verify = await verifySellerAccount.verifyInfoSeller()
+    const verify = verifySellerAccount.verifyIdSeler(1)
       
-    expect(verify).toBeFalsy()
+    expect(verify).toBeUndefined()
   })
-    
+  
   it('should return error in verify of id', async () => {
-    const verifySellerAccount = new VerifySellerAccount(1,'teste1@example.com','12345678910')
+    const verifySellerAccount = new VerifySellerAccount()
       
-    const verify = await verifySellerAccount.verifyInfoSeller()
+    const verify = verifySellerAccount.verifyIdSeler(0)
       
-    expect(verify.message).toBe('Your account seller already exist')
+    expect(verify).toBeDefined()
   })
     
-  it('should return error in verify of email', async () => {
-    const verifySellerAccount = new VerifySellerAccount(2,'teste@example.com','12345678910')
+  it('should return sucess in verify of email', async () => {
+    const verifySellerAccount = new VerifySellerAccount()
       
-    const verify = await verifySellerAccount.verifyInfoSeller()
-      
-    expect(verify.message).toMatch(/Email/)
+    const verify = verifySellerAccount.verifyEmailSeler('teste1@example.com')  
+  
+    expect(verify).toBeUndefined()
   })
+  
+  it('should return error in verify of email', async () => {
+    const verifySellerAccount = new VerifySellerAccount()
+      
+    const verify = verifySellerAccount.verifyEmailSeler('teste@example.com')  
+  
+    expect(verify).toBeDefined()
+    expect(verify).toMatch(/Email/)
+  })
+    
+  it('should return success in verify of phone number', async () => {
+    const verifySellerAccount = new VerifySellerAccount()
+      
+    const verify = verifySellerAccount.verifyPhoneSeler('12345678910')
+    
+    expect(verify).toBeUndefined()
+  })  
     
   it('should return error in verify of phone number', async () => {
-    const verifySellerAccount = new VerifySellerAccount(2,'teste1@example.com','123456789')
+    const verifySellerAccount = new VerifySellerAccount()
       
-    const verify = await verifySellerAccount.verifyInfoSeller()
-      
-    expect(verify.message).toMatch(/Phone/)
+    const verify = verifySellerAccount.verifyPhoneSeler('123456789')
+    
+    expect(verify).toBeDefined()
+    expect(verify).toMatch(/Phone/)
   })
 })
