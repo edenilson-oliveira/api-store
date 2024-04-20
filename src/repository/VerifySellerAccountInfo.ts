@@ -10,7 +10,7 @@ class VerifySellerAccount{
     this.sellerInfo = new SellerInfoOnCache()
   }
   
-  public async verifyIdSeler(id: number): Promise<string | undefined>{
+  public async verifyIdSeller(id: number): Promise<string | undefined>{
     
     const userInfo = await this.sellerInfo.getInfo()
     
@@ -27,7 +27,7 @@ class VerifySellerAccount{
     return verify
   }
   
-  public async verifyEmailSeler(email: string): Promise<string | undefined>{
+  public async verifyEmailSeller(email: string): Promise<string | undefined>{
     
     const userInfo = await this.sellerInfo.getInfo()
     
@@ -44,7 +44,7 @@ class VerifySellerAccount{
     return verify
   }
   
-  public async verifyPhoneSeler(phone: string): Promise<string | undefined>{
+  public async verifyPhoneSeller(phone: string): Promise<string | undefined>{
     
     const userInfo = await this.sellerInfo.getInfo()
     

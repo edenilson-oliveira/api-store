@@ -17,7 +17,7 @@ describe('Test verify seller account info', () => {
   it('should return sucess in verify of id', async () => {
     const verifySellerAccount = new VerifySellerAccount()
       
-    const verify = await verifySellerAccount.verifyIdSeler(0)
+    const verify = await verifySellerAccount.verifyIdSeller(0)
       
     expect(verify).toBeUndefined()
   })
@@ -25,7 +25,7 @@ describe('Test verify seller account info', () => {
   it('should return error in verify of id', async () => {
     const verifySellerAccount = new VerifySellerAccount()
       
-    const verify = await verifySellerAccount.verifyIdSeler(1)
+    const verify = await verifySellerAccount.verifyIdSeller(1)
       
     expect(verify).toBeDefined()
   })
@@ -33,7 +33,7 @@ describe('Test verify seller account info', () => {
   it('should return sucess in verify of email', async () => {
     const verifySellerAccount = new VerifySellerAccount()
       
-    const verify = await verifySellerAccount.verifyEmailSeler('teste1@example.com')  
+    const verify = await verifySellerAccount.verifyEmailSeller('teste1@example.com')  
   
     expect(verify).toBeUndefined()
   })
@@ -41,7 +41,7 @@ describe('Test verify seller account info', () => {
   it('should return error in verify of email', async () => {
     const verifySellerAccount = new VerifySellerAccount()
       
-    const verify = await verifySellerAccount.verifyEmailSeler('teste@example.com')  
+    const verify = await verifySellerAccount.verifyEmailSeller('teste@example.com')  
   
     expect(verify).toBeDefined()
     expect(verify).toMatch(/Email/)
@@ -50,7 +50,7 @@ describe('Test verify seller account info', () => {
   it('should return success in verify of phone number', async () => {
     const verifySellerAccount = new VerifySellerAccount()
       
-    const verify = await verifySellerAccount.verifyPhoneSeler('12345678910')
+    const verify = await verifySellerAccount.verifyPhoneSeller('12345678910')
     
     expect(verify).toBeUndefined()
   })  
@@ -58,7 +58,7 @@ describe('Test verify seller account info', () => {
   it('should return error in verify of phone number', async () => {
     const verifySellerAccount = new VerifySellerAccount()
       
-    const verify = await verifySellerAccount.verifyPhoneSeler('123456789')
+    const verify = await verifySellerAccount.verifyPhoneSeller('123456789')
     
     expect(verify).toBeDefined()
     expect(verify).toMatch(/Phone/)

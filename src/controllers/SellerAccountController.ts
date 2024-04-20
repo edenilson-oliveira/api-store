@@ -1,8 +1,12 @@
 import { Request,Response } from 'express';
 import Seller from '../database/models/seller';
+import SendMail from '../services/mail';
+import SendSms from '../services/sendSms';
+import CodeGenerate from '../services/codeGenerate';
 import verifyTokenUser from '../authentication/VerifyToken';
-import ValidateSellerAccountInfo from '../services/validateSellerAccountInfo'; 
+import ValidateSellerAccountInfo from '../services/validateSellerAccountInfo';
 import VerifyUserIsSeller from '../repository/VerifyUserIsSeller'
+import client from '../redisConfig';
 
 class SellerAccountController{
   public async GetInfoSellerAccount(req: Request,res: Response){
@@ -84,6 +88,56 @@ class SellerAccountController{
       res.status(500).json({message: 'Internal server error'})
     }
   }
+  
+  public async EditEmailStore(req: Request,res: Response){
+    try{
+      
+      const verifyToken = verifyTokenUser.execute(req,res)
+      const id = verifyToken.userId
+      
+      if(!verifyToken.auth){
+        return
+      }
+      
+      const { email } = req.body
+      
+      const emailIsValide = new ValidateSellerAccountInfo().validateEmail(email)
+      
+      if(emailIsValide){
+        const sellerEmail = await Seller.findAll({
+          where: {
+            emailStore: email
+          }
+        })
+        
+        if(sellerEmail.length > 0){
+          return res.status(409).json({message: 'Email already exist'})
+        }
+        
+        const code = new CodeGenerate().execute()
+        
+        const sendMail = new SendMail(email,'Confirm Email', `
+        <h1>Api Store</h1>
+        <p>Confirm your email with code ${code} for to edit seller account</p>
+        `).execute()
+        
+        const userSellerEmail = { email, code }
+        
+        client.set(`user-seller-email-${id}`, JSON.stringify(userSellerEmail))
+        
+        client.expire(`user-seller-email-${id}`, 60)
+        
+        
+        return res.status(200).json('Confirm your email')
+      }
+      
+      res.status(400).json({message: 'Email is not valid'})
+    }
+  catch{
+    res.status(500).json({message: 'Internal server error'})
+    }
+  }
+  
 }
 
 export default new SellerAccountController

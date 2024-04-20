@@ -24,12 +24,17 @@ class SellerAccountController{
       
     if(emailIsValide){
         
-      const verifySellerAccount = new VerifySellerAccount(id as number,email,'')
+      const verifySellerAccount = new VerifySellerAccount()
       
-      const verify = await verifySellerAccount.verifyInfoSeller()
+      const [verifyId,verifyEmail] = await Promise.all([
+        verifySellerAccount.verifyIdSeller(id as number),
+        verifySellerAccount.verifyEmailSeller(email)
+        ])
+        
+      const verify = verifyId || verifyEmail  
         
       if(verify){
-        return res.status(409).json({message: verify.message})
+        return res.status(409).json({message: verify})
       }
 
       const code = new CodeGenerate().execute()
@@ -98,12 +103,19 @@ class SellerAccountController{
       
       const phoneIsValide = new ValidateSellerAccountInfo().validatePhone(phone)
       
-      if(phoneIsValide){const verifySellerAccount = new VerifySellerAccount(id as number,'',phone)
+      if(phoneIsValide){
+        
+        const verifySellerAccount = new VerifySellerAccount()
       
-        const verify = await verifySellerAccount.verifyInfoSeller()
+        const [verifyId,verifyPhone] = await Promise.all([
+        verifySellerAccount.verifyIdSeller(id as number),
+        verifySellerAccount.verifyPhoneSeller(phone)
+        ])
+        
+      const verify = verifyId || verifyPhone
         
         if(verify){
-          return res.status(409).json({message: verify.message})
+          return res.status(409).json({message: verify})
         }
         
         
@@ -178,6 +190,14 @@ class SellerAccountController{
         return
       }
       
+      const verifySellerAccount = new VerifySellerAccount()
+      
+      const verify = await verifySellerAccount.verifyIdSeller(id as number)
+      
+      if(verify){
+        return res.status(400).json({message: verify})
+      }
+      
       const { name,description,category } = req.body
       
       const userSellerContact = await client.get(`user-seller-contact-${id}`) || ''
@@ -213,14 +233,6 @@ class SellerAccountController{
         category: category || '',
         description,
         status
-      }
-      
-      const verifySellerAccount = new VerifySellerAccount(id as number,user.emailStore,user.phone)
-      
-      const verify = await verifySellerAccount.verifyInfoSeller()
-      
-      if(verify){
-        return res.status(400).json({message: verify.message})
       }
       
       await Seller.create(user)
