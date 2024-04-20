@@ -5,52 +5,59 @@ import SellerInfoOnCache from './SellerInfoOnCache';
 class VerifySellerAccount{
   
   private sellerInfo: SellerInfoOnCache
-  private userInfo: UserSellerInfo[]
   
   constructor(){
     this.sellerInfo = new SellerInfoOnCache()
-    this.userInfo = [{id: -1,email: '',phone: ''}] as UserSellerInfo[]
-    
-    this.start()
   }
   
-  private async start(){
-    this.userInfo = await this.sellerInfo.getInfo()
-  }
-  
-  public async verifyIdSeler(id: number): Promise<string | void>{
-  
-    console.log(this.userInfo)
+  public async verifyIdSeler(id: number): Promise<string | undefined>{
     
-    if(this.userInfo.length > 0){
-      this.userInfo.map((value: UserSellerInfo) => {
+    const userInfo = await this.sellerInfo.getInfo()
+    
+    let verify: string | undefined;
+    
+    if(userInfo.length > 0){
+      userInfo.map((value: UserSellerInfo) => {
         if(id === value.id){
-          return 'Your account seller already exist'
+          verify = 'Your account seller already exist'
         }
       })
     }
+    
+    return verify
   }
   
-  public async verifyEmailSeler(email: string): Promise<string | void>{
+  public async verifyEmailSeler(email: string): Promise<string | undefined>{
     
-    if(this.userInfo.length > 0){
-      this.userInfo.map((value: UserSellerInfo) => {
+    const userInfo = await this.sellerInfo.getInfo()
+    
+    let verify: string | undefined;
+    
+    if(userInfo.length > 0){
+      userInfo.map((value: UserSellerInfo) => {
         if(email === value.email){
-          return 'Email seller already exist'
+          verify = 'Email seller already exist'
         }
       })
     }
+    
+    return verify
   }
   
-  public async verifyPhoneSeler(phone: string): Promise<string | void>{
+  public async verifyPhoneSeler(phone: string): Promise<string | undefined>{
     
-    if(this.userInfo.length > 0){
-      this.userInfo.map((value: UserSellerInfo) => {
+    const userInfo = await this.sellerInfo.getInfo()
+    
+    let verify: string | undefined;
+    
+    if(userInfo.length > 0){
+      userInfo.map((value: UserSellerInfo) => {
         if(phone === value.phone){
-          return 'Phone number sales already exist'
+          verify = 'Phone number sales already exist'
         }
       })
     }
+    return verify
   }
 }
 

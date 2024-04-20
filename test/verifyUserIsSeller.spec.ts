@@ -27,6 +27,6 @@ describe('Test of verify user is seller', () => {
     
     const verify = await verifyUserIsSeller.execute()
     
-    expect(verify).toBe('This account is not seller')
+    expect(verify).toBe('This account is not seller account')
   })
 })
