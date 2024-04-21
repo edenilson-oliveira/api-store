@@ -18,7 +18,7 @@ describe('Test of verify user is seller', () => {
     
     const verify = await verifyUserIsSeller.execute()
     
-    expect(verify).toBeTruthy()
+    expect(verify).toBeUndefined()
   })
   
   

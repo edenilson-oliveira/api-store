@@ -8,14 +8,14 @@ class VerifyUserIsSeller{
     this.id = id
   }
   
-  public async execute(){
+  public async execute(): Promise<string | undefined> {
     const sellerInfo = await (new SellerInfoOnCache()).getInfo()
     
     const verify = sellerInfo.length > 0 ? sellerInfo.some((value 
     : UserSellerInfo) => this.id === value.id) : false
     
     if(verify){
-      return true
+      return
     }
       
     return 'This account is not seller account'
