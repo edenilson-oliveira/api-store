@@ -24,9 +24,33 @@ describe('Test of seller info on cache', () => {
     
     const getSellerInfo = await sellerInfo.getInfo()
     
-    expect(getSellerInfo[0]).toHaveProperty('id',0)
-    expect(getSellerInfo[0]).toHaveProperty('email','teste@example.com')
-    expect(getSellerInfo[0]).toHaveProperty('phone','123456789')
+    const findById = getSellerInfo.map(value => {
+      if(value.id === 0){
+        return value
+      }
+    })
+    
+    expect(findById[0]).toHaveProperty('id',0)
+    expect(findById[0]).toHaveProperty('email','teste@example.com')
+    expect(findById[0]).toHaveProperty('phone','123456789')
+  })
+  
+  it('should edit seller info', async () => {
+    const sellerInfo = new SellerInfoOnCache()
+    const dataEditSellerInfo = {id: 0,email: 'new.email@example.com',phone: ''}
+    await sellerInfo.EditById(dataEditSellerInfo)
+    
+    const getSellerInfo = await sellerInfo.getInfo()
+    
+    const findByEmail = getSellerInfo.map(value => {
+      if(dataEditSellerInfo.email === value.email){
+        return value
+      }
+    })
+    console.log(findByEmail)
+    expect(findByEmail[0]).toHaveProperty('email','new.email@example.com')
+    expect(findByEmail[0]).toHaveProperty('phone','123456789')
+    
   })
   
 })
