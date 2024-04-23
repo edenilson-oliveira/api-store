@@ -38,7 +38,7 @@ describe('Test of seller info on cache', () => {
   it('should edit seller info', async () => {
     const sellerInfo = new SellerInfoOnCache()
     const dataEditSellerInfo = {id: 0,email: 'new.email@example.com',phone: ''}
-    await sellerInfo.EditById(dataEditSellerInfo)
+    await sellerInfo.edit(dataEditSellerInfo)
     
     const getSellerInfo = await sellerInfo.getInfo()
     
@@ -47,7 +47,7 @@ describe('Test of seller info on cache', () => {
         return value
       }
     })
-    console.log(findByEmail)
+    
     expect(findByEmail[0]).toHaveProperty('email','new.email@example.com')
     expect(findByEmail[0]).toHaveProperty('phone','123456789')
     

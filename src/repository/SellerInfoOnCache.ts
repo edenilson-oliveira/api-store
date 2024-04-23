@@ -16,7 +16,7 @@ export default class SellerInfoOnCache{
     await client.set('user-seller-info',  JSON.stringify(sellerInfo))
   }
   
-  public async EditById(info: any) {
+  public async edit(info: any) {
     const sellerInfo = await this.getInfo()
     
     const newData = {

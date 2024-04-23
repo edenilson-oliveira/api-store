@@ -6,7 +6,8 @@ import CodeGenerate from '../services/codeGenerate';
 import verifyTokenUser from '../authentication/VerifyToken';
 import ValidateSellerAccountInfo from '../services/validateSellerAccountInfo';
 import VerifySellerAccount from '../repository/VerifySellerAccountInfo';
-import VerifyUserIsSeller from '../repository/VerifyUserIsSeller'
+import VerifyUserIsSeller from '../repository/VerifyUserIsSeller';
+import SellerInfoOnCache from '../repository/SellerInfoOnCache';
 import client from '../redisConfig';
 
 class SellerAccountController{
@@ -93,7 +94,7 @@ class SellerAccountController{
   public async EditEmailStore(req: Request,res: Response){
     
     const verifyToken = verifyTokenUser.execute(req,res)
-      const id = verifyToken.userId || 0
+    const id = verifyToken.userId || 0
     
     if(!verifyToken.auth){
         return
@@ -140,6 +141,57 @@ class SellerAccountController{
     }
       
     res.status(400).json({message: 'Email is not valid'})
+  }
+  
+  public async confirmEditEmailStore(req: Request,res: Response){
+    try{
+      const verifyToken = verifyTokenUser.execute(req,res)
+      const id = verifyToken.userId || 0
+      
+      if(!verifyToken.auth){
+          return
+      }
+          
+      const verifyUserIsSeller = new VerifyUserIsSeller(id)
+          
+      const verify = await verifyUserIsSeller.execute()
+          
+      if(verify){
+        return res.status(401).json({message: verify})
+      }
+        
+      const userCode = req.body.code
+        
+      const userInfo  = await client.get(`user-seller-edit-email-${id}`) || ''
+        
+      if(!userInfo){
+        return res.status(404).end()
+      }
+        
+      const { code, email } = JSON.parse(userInfo)
+        
+      if(userCode === code){
+        
+        const sellerInfoOnCache = new SellerInfoOnCache()
+        
+        sellerInfoOnCache.edit({id,email,phone: ''})
+        await Seller.update({emailStore: email},{
+          where: {
+            id
+          }
+        })
+        
+        client.del(`user-seller-edit-email-${id}`)
+        
+        return res.status(200).json({ message: 'Email edited successfully'})
+        
+      }
+        
+      res.status(400).json({message: 'Code is not valid'})
+  }
+  catch{
+    res.status(500).json({message: 'Internal server error'})
+  }
   }
 }
 
