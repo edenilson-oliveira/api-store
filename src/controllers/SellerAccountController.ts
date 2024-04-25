@@ -188,10 +188,10 @@ class SellerAccountController{
       }
         
       res.status(400).json({message: 'Code is not valid'})
-  }
-  catch{
-    res.status(500).json({message: 'Internal server error'})
-  }
+    }
+    catch{
+      res.status(500).json({message: 'Internal server error'})
+    }
   }
   
   public async EditPhone(req: Request,res: Response){
@@ -233,7 +233,6 @@ class SellerAccountController{
       if(!send.body){
         return res.status(400).json({message: send})
       }
-      
         
       const userSellerPhone = { phone, code }
         
@@ -293,10 +292,11 @@ class SellerAccountController{
       }
         
       res.status(400).json({message: 'Code is not valid'})
-  }
-  catch{
-    res.status(500).json({message: 'Internal server error'})
-  }
+      
+    }
+    catch{
+      res.status(500).json({message: 'Internal server error'})
+    }
   }
   
 }

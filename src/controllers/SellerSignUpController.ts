@@ -244,6 +244,8 @@ class SellerAccountController{
           email: user.emailStore,
           phone: user.phone
       })
+      
+      client.del(`user-seller-contact-${id}`)
     
       
       res.status(200).json({message: 'seller account created with successfully'})
