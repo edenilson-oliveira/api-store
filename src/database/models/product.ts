@@ -1,4 +1,4 @@
-import { p } from 'sequelize';
+import { Model } from 'sequelize';
 import sequelize from 'sequelize';
 import db from '.';
 
@@ -15,14 +15,14 @@ class Product extends Model{
   declare updatedAt: Date
 }
 
-Seller.init({
+Product.init({
   id: {
     type: Sequelize.INTEGER,
     autoIncrement: true,
     allowNull: false,
     primaryKey: true,
   },
-    sellerId: {
+  sellerId: {
     type: Sequelize.INTEGER,
     allowNull: false,
   },
@@ -55,7 +55,6 @@ Seller.init({
     type: Sequelize.DATE,
     defaultValue: new Date(),
   }
-      
 },{
   sequelize: db,
   tableName: 'products',
