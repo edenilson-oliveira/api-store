@@ -17,42 +17,42 @@ class Product extends Model{
 
 Product.init({
   id: {
-    type: Sequelize.INTEGER,
+    type: sequelize.INTEGER,
     autoIncrement: true,
     allowNull: false,
     primaryKey: true,
   },
   sellerId: {
-    type: Sequelize.INTEGER,
+    type: sequelize.INTEGER,
     allowNull: false,
   },
   price: {
-    type: Sequelize.FLOAT,
+    type: sequelize.FLOAT,
     allowNull: false,
   },
   quantity: {
-    type: Sequelize.INTEGER,
+    type: sequelize.INTEGER,
     allowNull: false,
   },
   discount: {
-    type: Sequelize.FLOAT
+    type: sequelize.FLOAT
   },
   description: {
-    type: Sequelize.STRING,
+    type: sequelize.STRING,
     allowNull: false
   },
   img: {
-    type: Sequelize.STRING,
+    type: sequelize.STRING,
     allowNull: false
   },
   createdAt: {
     allowNull: false,
-    type: Sequelize.DATE,
+    type: sequelize.DATE,
     defaultValue: new Date(),
   },
   updatedAt: {
     allowNull: false,
-    type: Sequelize.DATE,
+    type: sequelize.DATE,
     defaultValue: new Date(),
   }
 },{
