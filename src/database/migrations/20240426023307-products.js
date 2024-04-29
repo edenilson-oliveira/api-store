@@ -9,6 +9,10 @@ module.exports = {up: async (queryInterface, Sequelize) => {
           allowNull: false,
           primaryKey: true,
         },
+        name: {
+          type: Sequelize.STRING,
+          allowNull: false
+        },
         sellerId: {
           type: Sequelize.INTEGER,
           allowNull: false,

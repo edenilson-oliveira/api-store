@@ -5,6 +5,7 @@ import db from '.';
 class Product extends Model{
   declare id: number
   declare sellerId: number
+  declare name: string
   declare price: number
   declare quantity: number
   declare discount: number
@@ -25,6 +26,10 @@ Product.init({
   sellerId: {
     type: sequelize.INTEGER,
     allowNull: false,
+  },
+  name: {
+    type: sequelize.STRING,
+    allowNull: false
   },
   price: {
     type: sequelize.FLOAT,
