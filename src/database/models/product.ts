@@ -33,17 +33,26 @@ Product.init({
   },
   price: {
     type: sequelize.FLOAT,
-    allowNull: false,
+    allowNull: false
   },
   quantity: {
     type: sequelize.INTEGER,
-    allowNull: false,
+    allowNull: false
   },
   discount: {
     type: sequelize.FLOAT
   },
   description: {
     type: sequelize.STRING,
+    allowNull: false
+  },
+  category: {
+    type: sequelize.STRING,
+    allowNull: false
+  },
+  salesQuantity: {
+    type: sequelize.INTEGER,
+    defaultValue: 0,
     allowNull: false
   },
   img: {

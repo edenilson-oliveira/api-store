@@ -32,6 +32,15 @@ module.exports = {up: async (queryInterface, Sequelize) => {
           type: Sequelize.STRING,
           allowNull: false
         },
+        category: {
+          type: Sequelize.STRING,
+          allowNull: false
+        },
+        salesQuantity: {
+          type: Sequelize.INTEGER,
+          defaultValue: 0,
+          allowNull: false
+        },
         img: {
           type: Sequelize.STRING,
           allowNull: false
