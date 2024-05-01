@@ -6,6 +6,7 @@ import SendSms from '../services/sendSms';
 import CodeGenerate from '../services/codeGenerate';
 import ValidateSellerAccountInfo from '../services/validateSellerAccountInfo';
 import VerifySellerAccount from '../repository/VerifySellerAccountInfo';
+import ValidateCategory from '../services/validateCategory';
 import SellerInfoOnCache from '../repository/SellerInfoOnCache';
 import client from '../redisConfig';
 
@@ -216,7 +217,6 @@ class SellerAccountController{
       const validateInfos = new ValidateSellerAccountInfo().validateInfoAboutStore(
           name || '',
           description || '',
-          category || '',
           status || ''
         )
       
@@ -225,12 +225,18 @@ class SellerAccountController{
         return res.status(400).json({message: validateInfos})
       }
       
+      const verifyCategory = new ValidateCategory().verifyCategoryExist('Computer components')
+      
+      if(!verifyCategory){
+        return res.status(404).json({message: 'Category not found'})
+      }
+      
       const user = {
         userId: id,
         emailStore: userContact.email,
         phone: userContact.phone,
         storeName: name,
-        category: category || '',
+        category: verifyCategory || '',
         description,
         status
       }

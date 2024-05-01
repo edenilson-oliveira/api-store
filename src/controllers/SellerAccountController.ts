@@ -5,6 +5,7 @@ import SendSms from '../services/sendSms';
 import CodeGenerate from '../services/codeGenerate';
 import verifyTokenUser from '../authentication/VerifyToken';
 import ValidateSellerAccountInfo from '../services/validateSellerAccountInfo';
+import ValidateCategory from '../services/validateCategory';
 import VerifySellerAccount from '../repository/VerifySellerAccountInfo';
 import VerifyUserIsSeller from '../repository/VerifyUserIsSeller';
 import SellerInfoOnCache from '../repository/SellerInfoOnCache';
@@ -78,10 +79,16 @@ class SellerAccountController{
       
       const validateInfos = new ValidateSellerAccountInfo()
       
-      const validate = validateInfos.validateInfoAboutStore(storeName,description,category,status)
+      const validate = validateInfos.validateInfoAboutStore(storeName,description,status)
       
       if(validate){
         return res.status(400).json({message: validate})
+      }
+      
+      const verifyCategory = new ValidateCategory().verifyCategoryExist('Computer components')
+      
+      if(!verifyCategory){
+        return res.status(404).json({message: 'Category not found'})
       }
       
       res.status(200).end()
