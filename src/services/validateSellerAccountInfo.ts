@@ -18,7 +18,7 @@ class ValidateSellerAccountInfo{
       }
     }
     
-  public validateInfoAboutStore(name:string ,description: string,category:string, status: any): void | string  {
+  public validateInfoAboutStore(name:string ,description: string,status: any): void | string  {
     try{
       
       if(!name || !status){
@@ -27,7 +27,6 @@ class ValidateSellerAccountInfo{
       
       this.validateLength(name, 'name', 15)
       this.validateLength(description, 'description', 120)
-      this.validateLength(category, 'category', 20)
       
       if(typeof status !== 'boolean'){
         throw new Error('The status property must be of boolean type, true or false')
