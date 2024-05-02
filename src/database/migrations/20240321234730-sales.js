@@ -27,7 +27,6 @@ module.exports = {up: async (queryInterface, Sequelize) => {
         },
         category: {
           type: Sequelize.STRING,
-          allowNull: false
         },
         status: {
           type: Sequelize.BOOLEAN,
