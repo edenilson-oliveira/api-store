@@ -85,7 +85,7 @@ class SellerAccountController{
         return res.status(400).json({message: validate})
       }
       
-      const verifyCategory = new ValidateCategory().verifyCategoryExist('Computer components')
+      const verifyCategory = new ValidateCategory().verifyCategoryExist(category)
       
       if(!verifyCategory){
         return res.status(404).json({message: 'Category not found'})

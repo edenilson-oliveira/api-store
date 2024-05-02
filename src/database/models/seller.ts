@@ -41,6 +41,7 @@ Seller.init({
   },
   category: {
     type: sequelize.STRING,
+    allowNull: false
   },
   status: {
     type: sequelize.BOOLEAN,
