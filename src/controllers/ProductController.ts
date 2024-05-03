@@ -1,7 +1,7 @@
 import { Request,Response } from 'express';
 import { Op } from 'sequelize';
 import Product from '../database/models/product';
-
+import ValidateCategory from '../services/validateCategory';
 
 class ProductController{
   public async getProducts(req: Request,res: Response){
@@ -17,7 +17,7 @@ class ProductController{
     }
   }
   
-  public async getProductFromSearch(req: Request,res: Response){
+  public async getProductBySearch(req: Request,res: Response){
     try{
       const { search } = req.params
       
@@ -42,7 +42,29 @@ class ProductController{
       res.status(500).json({message: 'Internal server error'})
     }
   }
-  
+  public async getProductsByCategory(req: Request,res: Response){
+    try{
+      const { category } = req.params
+      
+      const verifyCategory = new ValidateCategory().verifyCategoryExist(category || '')
+        
+      if(!verifyCategory){
+        return res.status(404).json({message: 'Category not found'})
+      }
+      
+      const products = await Product.findAll({ 
+        where: {
+          category: category || ''
+        },
+        limit: 20
+      })
+      
+      res.status(200).json(products)
+    }
+    catch{
+      res.status(500).json({message: 'Internal server error'})
+    }
+  }
 }
 
 export default new ProductController
