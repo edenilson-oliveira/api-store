@@ -35,3 +35,5 @@ class ProductSellerActionsController{
     }
   }
 }
+
+export default new ProductSellerActionsController
