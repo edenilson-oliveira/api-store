@@ -12,8 +12,6 @@ app.server.listen(process.env.PORT, () => {
 })
 
 
-//initServer()
-
 export default app
 
 

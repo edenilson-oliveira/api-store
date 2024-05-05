@@ -4,7 +4,8 @@ import router from './routes/';
 import helmet from 'helmet';
 import rateLimit from './middleware/rateLimit';
 import toobusy from './middleware/toobusy'
-import bodyParser from "body-parser";
+import bodyParser from 'body-parser';
+import cors from 'cors';
 
 export class App{
   public server: express.Application;
@@ -20,9 +21,11 @@ export class App{
     this.server.use(bodyParser.urlencoded({ extended: true }));
     this.server.use(cookieParser())
     this.server.use(helmet())
-    this.server.use(rateLimit('all',100,60*50))
+    this.server.use(rateLimit('all',100,60*5))
     this.server.use(toobusy)
-    
+    this.server.use(cors({
+      origin: 'http://localhost'
+    }))
   }
   
   private routes(){

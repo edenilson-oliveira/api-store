@@ -38,7 +38,7 @@ class SendMail{
     
     transporter.sendMail(options,(err,data) => {
       if(err){
-        return `Error to send email`
+        return err as any
       }
       else{
         return 'Email sent successfully'

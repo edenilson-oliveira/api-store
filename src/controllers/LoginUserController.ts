@@ -2,8 +2,8 @@ import { Request,Response,NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import User from '../database/models/user';
 
-import EmailVerify from './EmailVerify'
-import validator from '../utils/validator'
+import EmailVerify from '../repository/EmailVerify'
+import ValidateUserAccountInfo from '../services/validateUserAccountInfo'
 import generateTokenUser from '../authentication/GenerateTokenUser';
 import generateRefreshToken from '../authentication/GenerateRefreshToken';
 import SendMail from '../services/mail';
@@ -25,7 +25,7 @@ class LoginUserControler{
       
       const {firstName,lastName,email,password} = req.body
       
-      const validate = validator.execute(req.body)
+      const validate = new ValidateUserAccountInfo(req.body).execute()
       
       const emailVerify = new EmailVerify(email || '')
       

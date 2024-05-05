@@ -23,15 +23,14 @@ class VerifyToken{
     return this.BearerHeaderData
   }
   
-  public TokenOnBearerHeader(req: Request,res: Response) {
-    const bearerHeader = req.headers['authorization']
+  public TokenOnBearerHeader(headers: any) {
+    const bearerHeader = headers.authorization
     
     if(bearerHeader){
       const token = bearerHeader.split('Bearer ')[1]
       this.BearerHeaderData.token = token
       this.BearerHeaderData.exist = true
     }
-    
   }
   
   public getTokenOnly(token: string,secretKey=process.env.JWT_TOKEN_KEY): TokenUser{
@@ -47,8 +46,9 @@ class VerifyToken{
   
   
   public execute(req: Request,res: Response): Auth{
-      this.TokenOnBearerHeader(req,res)
+      this.TokenOnBearerHeader(req.headers)
       const { exist } =  this.BearerHeaderData
+      
       if(exist){
         const { token } = this.BearerHeaderData
         const verifyToken = this.getTokenOnly(token)
@@ -58,6 +58,7 @@ class VerifyToken{
           return {auth: false}
           
         }
+        
         return {auth: true,userId: verifyToken.id}
         
       }

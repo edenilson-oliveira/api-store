@@ -1,8 +1,8 @@
 import { Request,Response,NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import User from '../database/models/user';
-import EmailVerify from './EmailVerify'
-import validator from '../utils/validator'
+import EmailVerify from '../repository/EmailVerify'
+import ValidateUserAccountInfo from '../services/validateUserAccountInfo'
 import generateTokenUser from '../authentication/GenerateTokenUser';
 import verifyTokenUser from '../authentication/VerifyToken';
 import SendMail from '../services/mail';
@@ -151,7 +151,7 @@ class UserAccountController{
         
         
       
-        const validate = validator.execute(user)
+        const validate = new ValidateUserAccountInfo(user).execute()
         
         if(validate.isValidate && !isEmailExists){
           if(userPassword === userInfo.password && user.email === userInfo.email){
