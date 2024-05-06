@@ -2,12 +2,13 @@ import { Request,Response } from 'express';
 import Product from '../database/models/product';
 import verifyTokenUser from '../authentication/VerifyToken';
 import VerifyUserIsSeller from '../repository/VerifyUserIsSeller';
+import ValidateCategory from '../services/validateCategory';
 
 class ProductSellerActionsController{
   public async getProductsOfStore(req: Request,res: Response){
     try{
       const verifyToken = verifyTokenUser.execute(req,res)
-        const id = verifyToken.userId || 0
+      const id = verifyToken.userId || 0
           
       if(!verifyToken.auth){
         return
@@ -32,6 +33,38 @@ class ProductSellerActionsController{
     }
   catch{
     res.status(500).json({message: 'Internal server error'})
+    }
+  }
+  
+  public async addProduct(req: Request,res: Response){
+    try{
+      const verifyToken = verifyTokenUser.execute(req,res)
+      const id = verifyToken.userId || 0
+          
+      if(!verifyToken.auth){
+        return
+      }
+        
+      const verifyUserIsSeller = new VerifyUserIsSeller(id)
+        
+      const verify = await verifyUserIsSeller.execute()
+        
+      if(verify){
+        return res.status(401).json({message: verify})
+      }
+      
+      const { name,price,quantity,discount,description } = req.body
+      
+      const verifyCategory = new ValidateCategory().verifyCategoryExist(category || '')
+      
+      if(!verifyCategory){
+        return res.status(404).json({message: 'Category not found'})
+      }
+      
+      res.status(200).end()
+    }
+    catch{
+      res.status(500).json({message: 'Internal server error'})
     }
   }
 }

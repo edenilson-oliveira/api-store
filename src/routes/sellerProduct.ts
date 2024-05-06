@@ -4,5 +4,6 @@ import productsSellerActionsController from '../controllers/ProductSellerActions
 const router = express.Router()
 
 router.get('/users/seller/products',productsSellerActionsController.getProductsOfStore)
+router.post('/users/seller/products',productsSellerActionsController.addProduct)
 
 export default router
