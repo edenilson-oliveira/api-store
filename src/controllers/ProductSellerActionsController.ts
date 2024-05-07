@@ -53,7 +53,7 @@ class ProductSellerActionsController{
         return res.status(401).json({message: verify})
       }
       
-      const { name,price,quantity,discount,description } = req.body
+      const { name,price,quantity,discount,description,category } = req.body
       
       const verifyCategory = new ValidateCategory().verifyCategoryExist(category || '')
       
