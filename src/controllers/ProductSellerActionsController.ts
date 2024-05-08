@@ -3,6 +3,7 @@ import Product from '../database/models/product';
 import verifyTokenUser from '../authentication/VerifyToken';
 import VerifyUserIsSeller from '../repository/VerifyUserIsSeller';
 import ValidateCategory from '../services/validateCategory';
+import ValidateInfoAboutProduct from '../services/validateInfoAboutProduct';
 
 class ProductSellerActionsController{
   public async getProductsOfStore(req: Request,res: Response){
@@ -59,6 +60,13 @@ class ProductSellerActionsController{
       
       if(!verifyCategory){
         return res.status(404).json({message: 'Category not found'})
+      }
+      
+      const validateInfoProduct = new ValidateInfoAboutProduct()
+      const validate = validateInfoProduct.validateAllInfo(name,price,quantity,discount,description)
+      
+      if(validate){
+        return res.status(400).json({message: validate})
       }
       
       res.status(200).end()
