@@ -69,6 +69,10 @@ class ProductSellerActionsController{
         return res.status(400).json({message: validate})
       }
       
+      if(Number(price) <= 0 || Number(quantity) <= 0){
+        return res.status(400).json({message: 'Price and quantity must be greater than 0'})
+      }
+      
       res.status(200).end()
     }
     catch{
