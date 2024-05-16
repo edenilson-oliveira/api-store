@@ -1,18 +1,16 @@
-import multer from 'multer';
-import crypto from 'crypto'
+import { multer,StorageEngine,Multer } from 'multer';
 
 class MulterConfig{
-  public storage: string
+  private storage: StorageEngine
+  private upload: Multer
   
   constructor(){
-    this.storage = multer.diskStorage({
-      destination:
-      filename(request,file,callback){
-        const hash = crypto.randomBytes(6).toString('hex')
-        
-        callback(null, hash)
-      }
-    })
+    this.storage = multer.memoryStorage();
+    this.upload = multer({ this.storage })
+  }
+  
+  public getUpload(): Multer{
+    return this.upload.single(req,res)
   }
 }
 
