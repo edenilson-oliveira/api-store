@@ -1,17 +1,12 @@
-import { multer,StorageEngine,Multer } from 'multer';
+import multer from 'multer';
+import { Request } from 'express'
 
-class MulterConfig{
-  private storage: StorageEngine
-  private upload: Multer
-  
-  constructor(){
-    this.storage = multer.memoryStorage();
-    this.upload = multer({ this.storage })
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req: Request,file: any) => {
+    console.log(file.originalname)
   }
-  
-  public getUpload(): Multer{
-    return this.upload.single(req,res)
-  }
-}
+}).array('images');
 
-export default new MulterConfig
+export default upload
