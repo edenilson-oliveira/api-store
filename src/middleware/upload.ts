@@ -1,13 +1,13 @@
-import { Request,Response } from 'express';
-import multer from 'multer'
-import cloudinary from '../services/cloudinary';
+import multer from 'multer';
+import { Request } from 'express'
 
-class Upload{
-  public execute(req: Request,file: any){
-    const storage = multer.memoryStorage()
-    const upload = multer({ storage })
-    
-    fileSize: 5 * 1024 * 1024
-    
+const upload: any = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req: Request,file: any) => {
+    console.log(file.originalname)
   }
-}
+}).array('images');
+
+
+export default upload

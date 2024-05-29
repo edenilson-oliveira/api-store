@@ -1,10 +1,10 @@
 import express from 'express';
-import upload from '../config/multerConfig'
+import upload from '../middleware/upload'
 import productsSellerActionsController from '../controllers/ProductSellerActionsController';
 
 const router = express.Router()
 
 router.get('/users/seller/products',productsSellerActionsController.getProductsOfStore)
-router.post('/users/seller/products', upload,productsSellerActionsController.addProduct)
+router.post('/users/seller/products',upload,productsSellerActionsController.addProduct)
 
 export default router
