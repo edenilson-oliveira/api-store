@@ -45,7 +45,7 @@ class ProductSellerActionsController{
       if(!verifyToken.auth){
         return
       }
-        
+      
       const verifyUserIsSeller = new VerifyUserIsSeller(id)
         
       const verify = await verifyUserIsSeller.execute()

@@ -1,5 +1,5 @@
 import multer, { Options,FileFilterCallback } from 'multer';
-import { Request,Express } from 'express'
+import { Request,Response,Express } from 'express'
 
 const configMulter = {
   storage: multer.memoryStorage(),
@@ -7,9 +7,11 @@ const configMulter = {
   fileFilter: (req: Request,file: Express.Multer.File,callback: FileFilterCallback) => {
     
     const getExtensionFile= file.originalname.slice(file.originalname.length-4,file.originalname.length)
-    if(getExtensionFile === '.png' || getExtensionFile === '.jpg'){
-      return callback(null,true)
+    if(!(getExtensionFile === '.png' || getExtensionFile === '.jpg')){
+      callback(new Error('Error the file extension is not valid'))
     }
+    
+    callback(null,false)
   }
 }
 
