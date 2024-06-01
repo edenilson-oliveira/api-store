@@ -1,20 +1,34 @@
 import multer, { Options,FileFilterCallback } from 'multer';
-import { Request,Response,Express } from 'express'
+import { Request,Response,NextFunction,Express } from 'express'
 
-const configMulter = {
+const configMulter = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req: Request,file: Express.Multer.File,callback: FileFilterCallback) => {
     
-    const getExtensionFile= file.originalname.slice(file.originalname.length-4,file.originalname.length)
-    if(!(getExtensionFile === '.png' || getExtensionFile === '.jpg')){
+    const getExtensionFile = file.originalname.slice(file.originalname.length-4,file.originalname.length)
+    
+    const verifyFileExtension = getExtensionFile === '.png'|| getExtensionFile === '.jpg'
+    
+    if(!verifyFileExtension){
       callback(new Error('Error the file extension is not valid'))
     }
     
     callback(null,false)
   }
-}
+})
 
-const upload = multer(configMulter)
+
+const upload = (req: Request, res: Response,next: NextFunction) => {
+  
+  const uploadMulter = configMulter.array('images')
+  
+  uploadMulter(req,res,(err: any) => {
+    if(err){
+      return res.status(400).json({message: err.message})
+    }
+    next()
+  })
+}
 
 export default upload

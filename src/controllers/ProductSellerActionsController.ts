@@ -1,4 +1,4 @@
-import { Request,Response } from 'express';
+import { Request,Response,NextFunction } from 'express';
 import Product from '../database/models/product';
 import verifyTokenUser from '../authentication/VerifyToken';
 import VerifyUserIsSeller from '../repository/VerifyUserIsSeller';
@@ -37,7 +37,7 @@ class ProductSellerActionsController{
     }
   }
   
-  public async addProduct(req: Request,res: Response){
+  public async addProduct(req: Request,res: Response,next: NextFunction){
     try{
       const verifyToken = verifyTokenUser.execute(req,res)
       const id = verifyToken.userId || 0

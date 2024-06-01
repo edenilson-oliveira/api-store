@@ -5,6 +5,6 @@ import productsSellerActionsController from '../controllers/ProductSellerActions
 const router = express.Router()
 
 router.get('/users/seller/products',productsSellerActionsController.getProductsOfStore)
-router.post('/users/seller/products',upload.array('images') ,productsSellerActionsController.addProduct)
+router.post('/users/seller/products',upload,productsSellerActionsController.addProduct)
 
 export default router
