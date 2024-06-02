@@ -4,6 +4,7 @@ import verifyTokenUser from '../authentication/VerifyToken';
 import VerifyUserIsSeller from '../repository/VerifyUserIsSeller';
 import ValidateCategory from '../services/validateCategory';
 import ValidateInfoAboutProduct from '../services/validateInfoAboutProduct';
+import cloudinary from '../services/cloudinary'
 
 class ProductSellerActionsController{
   public async getProductsOfStore(req: Request,res: Response){
@@ -58,7 +59,7 @@ class ProductSellerActionsController{
       
       const verifyCategory = new ValidateCategory().verifyCategoryExist(category || '')
       
-      if(!verifyCategory){
+      if(verifyCategory){
         return res.status(404).json({message: 'Category not found'})
       }
       
@@ -72,6 +73,10 @@ class ProductSellerActionsController{
       if(Number(price) <= 0 || Number(quantity) <= 0){
         return res.status(400).json({message: 'Price and quantity must be greater than 0'})
       }
+      
+      const upload = await cloudinary.uploadImage(req.file)
+      
+      console.log(upload)
       
       res.status(200).end()
     }
