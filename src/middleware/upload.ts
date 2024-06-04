@@ -5,7 +5,7 @@ const configMulter = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req: Request,file: Express.Multer.File,callback: FileFilterCallback) => {
-    console.log(file)
+
     const getExtensionFile = file.originalname.slice(file.originalname.length-4,file.originalname.length)
     
     const verifyFileExtension = getExtensionFile === '.png'|| getExtensionFile === '.jpg'
