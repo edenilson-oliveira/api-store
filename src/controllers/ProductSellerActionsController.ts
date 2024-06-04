@@ -4,6 +4,8 @@ import verifyTokenUser from '../authentication/VerifyToken';
 import VerifyUserIsSeller from '../repository/VerifyUserIsSeller';
 import ValidateCategory from '../services/validateCategory';
 import ValidateInfoAboutProduct from '../services/validateInfoAboutProduct';
+import cloudinary from '../services/cloudinary';
+import client from '../redisConfig';
 
 class ProductSellerActionsController{
   public async getProductsOfStore(req: Request,res: Response){
@@ -48,13 +50,22 @@ class ProductSellerActionsController{
       
       const verifyUserIsSeller = new VerifyUserIsSeller(id)
         
-      const verify = await verifyUserIsSeller.execute()
+      const [verify,getImageOfProduct] = await Promise.all([
+        verifyUserIsSeller.execute(),
+        client.get(`seller-product-image-${id}`)
+      ])
+
+      
         
       if(verify){
         return res.status(401).json({message: verify})
       }
       
-      const { name,price,quantity,discount,description,category } = req.body
+      if(!getImageOfProduct){
+        return res.status(404).json({message: 'image of product not found'})
+      }
+
+      const { name,price,quantity,discount,description,category } = req.body  
       
       const verifyCategory = new ValidateCategory().verifyCategoryExist(category || '')
       
@@ -72,7 +83,7 @@ class ProductSellerActionsController{
       if(Number(price) <= 0 || Number(quantity) <= 0){
         return res.status(400).json({message: 'Price and quantity must be greater than 0'})
       }
-      
+
       res.status(200).end()
     }
     catch{
