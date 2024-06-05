@@ -5,6 +5,7 @@ import VerifyUserIsSeller from '../repository/VerifyUserIsSeller';
 import ValidateCategory from '../services/validateCategory';
 import ValidateInfoAboutProduct from '../services/validateInfoAboutProduct';
 import client from '../redisConfig';
+import cloudinary from '../services/cloudinary'
 
 class ProductSellerActionsController{
   public async getProductsOfStore(req: Request,res: Response){
@@ -37,8 +38,31 @@ class ProductSellerActionsController{
     res.status(500).json({message: 'Internal server error'})
     }
   }
+
+  public async addImageProduct(req: Request, res: Response, next: NextFunction){
+    const verifyToken = verifyTokenUser.execute(req,res)
+      const id = verifyToken.userId || 0
+          
+      if(!verifyToken.auth){
+        return
+      }
+      
+      const verifyUserIsSeller = new VerifyUserIsSeller(id)
+
+      const verifyAccountSeller = await verifyUserIsSeller.execute()
+
+      if(verifyAccountSeller){
+        return res.status(401).json({message: verifyAccountSeller})
+      }
+
+      
+
+      res.status(200).end()
+
+      //const upload = await cloudinary.uploadImage(req.file)
+  }
   
-  public async addProduct(req: Request,res: Response,next: NextFunction){
+  public async addProduct(req: Request,res: Response){
     try{
       const verifyToken = verifyTokenUser.execute(req,res)
       const id = verifyToken.userId || 0
