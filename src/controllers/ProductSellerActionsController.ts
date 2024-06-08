@@ -6,6 +6,8 @@ import ValidateCategory from '../services/validateCategory';
 import ValidateInfoAboutProduct from '../services/validateInfoAboutProduct';
 import client from '../redisConfig';
 import cloudinary from '../services/cloudinary'
+import { v4  as  uuidv4 }   from 'uuid';
+import Express from 'express'
 
 class ProductSellerActionsController{
   public async getProductsOfStore(req: Request,res: Response){
@@ -55,11 +57,13 @@ class ProductSellerActionsController{
         return res.status(401).json({message: verifyAccountSeller})
       }
 
+
+      const files:any = req.files
       
+      const upload = await cloudinary.uploadImage(files)
 
-      res.status(200).end()
+      res.status(200).json({message: upload})
 
-      //const upload = await cloudinary.uploadImage(req.file)
   }
   
   public async addProduct(req: Request,res: Response){
@@ -104,8 +108,8 @@ class ProductSellerActionsController{
       if(Number(price) <= 0 || Number(quantity) <= 0){
         return res.status(400).json({message: 'Price and quantity must be greater than 0'})
       }
-      
-      res.status(200).end()
+      console.log(req.files)
+      res.status(200).json({message: req.files})
     }
     catch{
       res.status(500).json({message: 'Internal server error'})
