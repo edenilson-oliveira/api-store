@@ -41,7 +41,7 @@ class ProductSellerActionsController{
     }
   }
 
-  public async addImageProduct(req: Request, res: Response, next: NextFunction){
+  public async addImageProduct(req: Request, res: Response){
     const verifyToken = verifyTokenUser.execute(req,res)
       const id = verifyToken.userId || 0
           
@@ -57,10 +57,9 @@ class ProductSellerActionsController{
         return res.status(401).json({message: verifyAccountSeller})
       }
 
-
       const files:any = req.files
-      
-      const upload = await cloudinary.uploadImage(files)
+
+      const upload  = await cloudinary.uploadImage(files[0].path)
 
       res.status(200).json({message: upload})
 
