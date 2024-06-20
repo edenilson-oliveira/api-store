@@ -8,6 +8,7 @@ import client from '../redisConfig';
 import cloudinary from '../services/cloudinary'
 import { v4  as  uuidv4 }   from 'uuid';
 import Express from 'express'
+import upload from '../middleware/multer'
 
 class ProductSellerActionsController{
   public async getProductsOfStore(req: Request,res: Response){
@@ -41,7 +42,7 @@ class ProductSellerActionsController{
     }
   }
 
-  public async addImageProduct(req: Request, res: Response){
+  public async addImageProduct(req: Request, res: Response, next: NextFunction){
     const verifyToken = verifyTokenUser.execute(req,res)
       const id = verifyToken.userId || 0
           
@@ -57,11 +58,19 @@ class ProductSellerActionsController{
         return res.status(401).json({message: verifyAccountSeller})
       }
 
-      const files:any = req.files
+      const files: any = req.files
 
-      const upload  = await cloudinary.uploadImage(files[0].path)
+      let uploads: any = []
 
-      res.status(200).json({message: upload})
+      files.map(async (value: any) => {
+        const upload  = await cloudinary.uploadImage(value.path, uuidv4())
+
+        console.log(upload)
+
+        uploads += upload
+      }) 
+
+      res.status(200).end()
 
   }
   
