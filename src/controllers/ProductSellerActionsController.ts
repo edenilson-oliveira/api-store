@@ -9,6 +9,8 @@ import cloudinary from '../services/cloudinary'
 import { v4  as  uuidv4 }   from 'uuid';
 import Express from 'express'
 import upload from '../middleware/multer'
+import { resourceUsage } from 'process';
+import { error } from 'console';
 
 class ProductSellerActionsController{
   public async getProductsOfStore(req: Request,res: Response){
@@ -60,17 +62,18 @@ class ProductSellerActionsController{
 
       const files: any = req.files
 
-      let uploads: any = []
 
-      files.map(async (value: any) => {
-        const upload  = await cloudinary.uploadImage(value.path, uuidv4())
+      const uploads = await Promise.allSettled(
+        files.map((value: any) => cloudinary.uploadImage(value.path, uuidv4()))
+      ).then((result: any) => {
+        if(result.error){
+          return result.error
+        }
+        return result
+      })
+      console.log(uploads)
 
-        console.log(upload)
-
-        uploads += upload
-      }) 
-
-      res.status(200).end()
+      res.status(200).json({uploads})
 
   }
   
