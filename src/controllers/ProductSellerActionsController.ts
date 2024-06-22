@@ -62,16 +62,17 @@ class ProductSellerActionsController{
 
       const files: any = req.files
 
+      //console.log(files)
 
       const uploads = await Promise.allSettled(
-        files.map((value: any) => cloudinary.uploadImage(value.path, uuidv4()))
+        files.map((value: any) => cloudinary.uploadImage('test', uuidv4()))
       ).then((result: any) => {
         if(result.error){
           return result.error
         }
         return result
       })
-      console.log(uploads)
+      ///console.log(uploads)
 
       res.status(200).json({uploads})
 
