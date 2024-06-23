@@ -60,12 +60,15 @@ class ProductSellerActionsController{
         return res.status(401).json({message: verifyAccountSeller})
       }
 
-      const files: any = req.files
+      const filesImagesPoducts = await client.get(`files-images-product-${id}`) || ''
+      
+      const files = JSON.parse(filesImagesPoducts)
 
+      console.log(files)
       //console.log(files)
 
       const uploads = await Promise.allSettled(
-        files.map((value: any) => cloudinary.uploadImage('test', uuidv4()))
+        files.map((value: any) => cloudinary.uploadImage(value.path, uuidv4()))
       ).then((result: any) => {
         if(result.error){
           return result.error
