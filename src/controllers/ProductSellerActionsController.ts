@@ -6,7 +6,6 @@ import ValidateCategory from '../services/validateCategory';
 import ValidateInfoAboutProduct from '../services/validateInfoAboutProduct';
 import client from '../redisConfig';
 import cloudinary from '../services/cloudinary'
-import { v4  as  uuidv4 }   from 'uuid';
 import Express from 'express'
 import upload from '../middleware/multer'
 import { resourceUsage } from 'process';
@@ -64,18 +63,17 @@ class ProductSellerActionsController{
       
       const files = JSON.parse(filesImagesPoducts)
 
-      console.log(files)
-      //console.log(files)
 
       const uploads = await Promise.allSettled(
-        files.map((value: any) => cloudinary.uploadImage(value.path, uuidv4()))
+        files.map((value: any) => cloudinary.uploadImage(value.path))
       ).then((result: any) => {
         if(result.error){
           return result.error
         }
         return result
       })
-      ///console.log(uploads)
+
+      await client.del(`files-images-product-${id}`)
 
       res.status(200).json({uploads})
 

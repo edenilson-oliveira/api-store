@@ -2,14 +2,13 @@ import { UploadApiOptions } from 'cloudinary';
 import cloudinary from '../config/cloudinaryConfig';
 
 class Cloudinary{
-  public async uploadImage(imagePath: string, public_id: string){
+  public async uploadImage(imagePath: string){
     const options: UploadApiOptions = {
       use_filename: true,
       unique_filename: true,
       overwrite: true,
       width: 900,
       height: 500,
-      public_id
     };
 
     try {
