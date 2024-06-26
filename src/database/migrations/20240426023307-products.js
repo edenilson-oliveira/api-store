@@ -41,10 +41,6 @@ module.exports = {up: async (queryInterface, Sequelize) => {
           defaultValue: 0,
           allowNull: false
         },
-        img: {
-          type: Sequelize.STRING,
-          allowNull: false
-        },
         createdAt: {
           allowNull: false,
           type: Sequelize.DATE,

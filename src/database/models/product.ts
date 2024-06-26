@@ -10,8 +10,7 @@ class Product extends Model{
   declare quantity: number
   declare discount: number
   declare description: string
-  declare img: string
-  
+
   declare createdAt: Date
   declare updatedAt: Date
 }
@@ -53,10 +52,6 @@ Product.init({
   salesQuantity: {
     type: sequelize.INTEGER,
     defaultValue: 0,
-    allowNull: false
-  },
-  img: {
-    type: sequelize.STRING,
     allowNull: false
   },
   createdAt: {
