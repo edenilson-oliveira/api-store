@@ -38,13 +38,14 @@ class ProductSellerActionsController{
       
       res.status(200).json(products)
     }
-  catch{
-    res.status(500).json({message: 'Internal server error'})
+    catch{
+      res.status(500).json({message: 'Internal server error'})
     }
   }
 
   public async addImageProduct(req: Request, res: Response, next: NextFunction){
-    const verifyToken = verifyTokenUser.execute(req,res)
+    try{
+      const verifyToken = verifyTokenUser.execute(req,res)
       const id = verifyToken.userId || 0
           
       if(!verifyToken.auth){
@@ -65,18 +66,29 @@ class ProductSellerActionsController{
 
 
       const uploads = await Promise.allSettled(
-        files.map((value: any) => cloudinary.uploadImage(value.path))
+        files.map((value: any) => cloudinary.uploadImage('value.path'))
       ).then((result: any) => {
-        if(result.error){
-          return result.error
-        }
         return result
+      }).catch((err) => {
+        return err
       })
 
-      await client.del(`files-images-product-${id}`)
+      if(!uploads.value){
+        return res.status(400).json({message: 'Error on upload'})
+      }
+      
+      await Promise.all([
+        client.del(`files-images-product-${id}`),
+        client.set(`images-products-${id}`,JSON.stringify({
+          filename: uploads.filename,
+          url: uploads.url
+      }))])
 
-      res.status(200).json({uploads})
-
+      res.status(200).end()
+    }
+    catch{
+      res.status(500).json({message: 'Internal server error'})
+    }
   }
   
   public async addProduct(req: Request,res: Response){
