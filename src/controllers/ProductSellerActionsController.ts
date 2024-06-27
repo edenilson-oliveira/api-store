@@ -102,16 +102,16 @@ class ProductSellerActionsController{
       
       const verifyUserIsSeller = new VerifyUserIsSeller(id)
         
-      const [verify,getImageOfProduct] = await Promise.all([
+      const [verify,getImagesOfProduct] = await Promise.all([
         verifyUserIsSeller.execute(),
-        client.get(`seller-product-image-${id}`)
+        client.get(`images-products-${id}`)
       ])
         
       if(verify){
         return res.status(401).json({message: verify})
       }
 
-      if(!getImageOfProduct){
+      if(!getImagesOfProduct){
         return res.status(404).json({message:'product image not found'})
       }
       
@@ -133,8 +133,12 @@ class ProductSellerActionsController{
       if(Number(price) <= 0 || Number(quantity) <= 0){
         return res.status(400).json({message: 'Price and quantity must be greater than 0'})
       }
-      console.log(req.files)
-      res.status(200).json({message: req.files})
+      /*
+      Product.create({
+        sellerId: id
+
+      })
+        */
     }
     catch{
       res.status(500).json({message: 'Internal server error'})
