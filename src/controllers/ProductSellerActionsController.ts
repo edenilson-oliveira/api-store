@@ -1,4 +1,5 @@
 import { Request,Response,NextFunction } from 'express';
+import Seller from '../database/models/seller';
 import Product from '../database/models/product';
 import verifyTokenUser from '../authentication/VerifyToken';
 import VerifyUserIsSeller from '../repository/VerifyUserIsSeller';
@@ -106,7 +107,6 @@ class ProductSellerActionsController{
         verifyUserIsSeller.execute(),
         client.get(`images-products-${id}`)
       ])
-        
       if(verify){
         return res.status(401).json({message: verify})
       }
@@ -116,8 +116,9 @@ class ProductSellerActionsController{
       }
       
       const { name,price,quantity,discount,description,category } = req.body
-      
+
       const verifyCategory = new ValidateCategory().verifyCategoryExist(category || '')
+      console.log(verifyCategory)
       
       if(!verifyCategory){
         return res.status(404).json({message: 'Category not found'})
@@ -133,12 +134,27 @@ class ProductSellerActionsController{
       if(Number(price) <= 0 || Number(quantity) <= 0){
         return res.status(400).json({message: 'Price and quantity must be greater than 0'})
       }
-      /*
-      Product.create({
-        sellerId: id
 
+      const sellerId = await Seller.findAll({
+        attributes: ['id'],
+        where: {
+          userId: id
+        }
       })
-        */
+
+      
+      await Product.create({
+        sellerId: sellerId[0].dataValues.id,
+        name: name || '',
+        price: price || 0,
+        quantity: quantity || 0,
+        discount: discount || 0,
+        description: description || '',
+        category: category || ''
+      })
+
+      
+
     }
     catch{
       res.status(500).json({message: 'Internal server error'})
