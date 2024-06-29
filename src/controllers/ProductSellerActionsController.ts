@@ -11,6 +11,7 @@ import Express from 'express'
 import upload from '../middleware/multer'
 import { resourceUsage } from 'process';
 import { error } from 'console';
+import ImageProducts from '../database/models/image-products';
 
 class ProductSellerActionsController{
   public async getProductsOfStore(req: Request,res: Response){
@@ -65,25 +66,21 @@ class ProductSellerActionsController{
       
       const files = JSON.parse(filesImagesPoducts)
 
-
       const uploads = await Promise.allSettled(
-        files.map((value: any) => cloudinary.uploadImage('value.path'))
+        files.map((value: any) => cloudinary.uploadImage(value.path))
       ).then((result: any) => {
         return result
       }).catch((err) => {
         return err
       })
-
-      if(!uploads.value){
-        return res.status(400).json({message: 'Error on upload'})
-      }
       
+      const imageProductsInfo = uploads.map((upload: any) => {
+        return { filename: upload.value.original_filename, url: upload.value.url}
+      })
+
       await Promise.all([
         client.del(`files-images-product-${id}`),
-        client.set(`images-products-${id}`,JSON.stringify({
-          filename: uploads.filename,
-          url: uploads.url
-      }))])
+        client.set(`images-products-${id}`,JSON.stringify(imageProductsInfo))])
 
       res.status(200).end()
     }
@@ -112,13 +109,12 @@ class ProductSellerActionsController{
       }
 
       if(!getImagesOfProduct){
-        return res.status(404).json({message:'product image not found'})
+        return res.status(404).json({message:'Images product not found'})
       }
       
       const { name,price,quantity,discount,description,category } = req.body
 
       const verifyCategory = new ValidateCategory().verifyCategoryExist(category || '')
-      console.log(verifyCategory)
       
       if(!verifyCategory){
         return res.status(404).json({message: 'Category not found'})
@@ -143,7 +139,7 @@ class ProductSellerActionsController{
       })
 
       
-      await Product.create({
+      const productAdd = await Product.create({
         sellerId: sellerId[0].dataValues.id,
         name: name || '',
         price: price || 0,
@@ -153,7 +149,19 @@ class ProductSellerActionsController{
         category: category || ''
       })
 
-      
+      const imageProductsInfo = JSON.parse(getImagesOfProduct)
+
+      await Promise.all([
+        imageProductsInfo.map((value: any) => {
+          ImageProducts.create({
+            productId: productAdd.dataValues.id,
+            filename: value.filename,
+            url: value.url
+          })
+        }), client.del(`images-products-${id}`) ]
+      )
+
+      res.status(200).end()
 
     }
     catch{
