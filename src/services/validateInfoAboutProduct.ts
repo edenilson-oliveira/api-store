@@ -13,6 +13,12 @@ class ValidateInfoAboutProduct{
     if(verify != 0 && !verify)
     throw new Error(`Error ${valueName} is not a number`)
   }
+
+  private verifyPriceAndQuantity(price: string,quantity: string){
+    if(Number(price) <= 0 || Number(quantity) <= 0){
+      throw new Error('Price and quantity must be greater than 0')
+    }
+  }
   
   public validateAllInfo(name: string,price: string,quantity: string,discount: string,description: string): string | undefined{
     try{
@@ -22,6 +28,8 @@ class ValidateInfoAboutProduct{
       this.verifyIsNumber(price,'price')
       this.verifyIsNumber(quantity,'quantity')
       this.verifyIsNumber(discount,'discount')
+
+      this.verifyPriceAndQuantity(price,quantity)
     }
     catch(err: any){
       return err.message

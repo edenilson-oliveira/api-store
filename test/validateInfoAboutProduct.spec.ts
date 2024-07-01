@@ -29,4 +29,18 @@ describe('Test validate info about product', () => {
     expect(validate).toMatch(/number/)
   })
   
+  it('should return undefined in the verify of price and quantity', () => {
+    const validateInfoProduct = new ValidateInfoAboutProduct()
+    const validate = validateInfoProduct.validateAllInfo('cell phone','500','10','0','Portable and fast')
+
+    expect(validate).toBeUndefined()
+  })
+
+  it('should return error in the verify of price and quantity', () => {
+    const validateInfoProduct = new ValidateInfoAboutProduct()
+    const validate = validateInfoProduct.validateAllInfo('cell phone','500','0','0','Portable and fast')
+
+    expect(validate).toBeDefined()
+    expect(validate).toMatch(/Price and quantity/)
+  })
 })
