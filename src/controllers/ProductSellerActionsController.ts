@@ -167,54 +167,88 @@ class ProductSellerActionsController{
   }
 
   public async editInfoProduct(req: Request,res: Response){
-    const verifyToken = verifyTokenUser.execute(req,res)
-    const id = verifyToken.userId || 0
-          
-    if(!verifyToken.auth){
-      return
-    }
-      
-    const verifyUserIsSeller = new VerifyUserIsSeller(id)
+    try{
+      const verifyToken = verifyTokenUser.execute(req,res)
+      const id = verifyToken.userId || 0
+            
+      if(!verifyToken.auth){
+        return
+      }
         
-    const [verify,getImagesOfProduct] = await Promise.all([
-        verifyUserIsSeller.execute(),
-      client.get(`images-products-${id}`)
-    ])
+      const verifyUserIsSeller = new VerifyUserIsSeller(id)
+          
+      const verify = await verifyUserIsSeller.execute()
 
-    if(verify){
-      return res.status(401).json({message: verify})
-    }
-
-    
-    const sellerId = await Seller.findAll({
-      attributes: ['id'],
-      where: {
-        userId: id
+      if(verify){
+        return res.status(401).json({message: verify})
       }
-    })
-    
-    const productActual = await Product.findAll({
-      where: {
-        sellerId: sellerId[0].dataValues.id
-      }
-    })
-    
-    const { name,price,quantity,discount,description,category } = req.body
-
-    const validateInfoProduct = new ValidateInfoAboutProduct()
-    const validate = validateInfoProduct.validateAllInfo(name,price,quantity,discount,description)
-
-    const verifyCategory = new ValidateCategory().verifyCategoryExist(category || '')
-
-    if(!verifyCategory){
-      return res.status(404).json({message: 'Category not found'})
-    }
       
-    if(validate){
-      return res.status(400).json({message: validate})
-    }
+      const { name,price,quantity,discount,description,category } = req.body
+      
+      const productId = req.params.id
 
-    res.status(200).end()
+      if(!Number(productId)){
+        return res.status(400).json({message: 'Product id is not valid'})
+      }
+      
+      const productOnDatabase = await Product.findAll({
+        where: {
+          id: productId
+        }
+      })
+
+      if(!productOnDatabase.length){
+        return res.status(404).json({message: 'Product not found'})
+      }
+
+      const productActual = productOnDatabase[0].dataValues
+      
+      const productInfo = {
+        name: name || productActual.name,
+        price: price || productActual.price,
+        quantity: quantity || productActual.quantity,
+        discount: discount || productActual.discount,
+        description: description || productActual.description
+      }
+
+      const validateInfoProduct = new ValidateInfoAboutProduct()
+      const validate = validateInfoProduct.validateAllInfo(
+        productActual.name,
+        productInfo.price,
+        productInfo.quantity,
+        productInfo.discount,
+        productInfo.description
+      )
+      
+      
+      const verifyCategory = new ValidateCategory().verifyCategoryExist(category || '')
+      
+      if(!verifyCategory){
+        return res.status(404).json({message: 'Category not found'})
+      }
+      
+      if(validate){
+        return res.status(400).json({message: validate})
+      }
+      
+      await Product.update({
+        name: productActual.name,
+        price: productInfo.price,
+        quantity: productInfo.quantity,
+        discount: productInfo.discount,
+        description: productInfo.description
+      },
+      {
+        where: {
+          id: productId
+        }
+      })
+      
+      res.status(200).end()
+    }
+    catch{
+      res.status(500).json({message: 'Internal server error'})
+    }
   }
 }
 

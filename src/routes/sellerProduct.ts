@@ -7,6 +7,6 @@ const router = express.Router()
 router.get('/users/seller/products',productsSellerActionsController.getProductsOfStore)
 router.post('/users/seller/product/add',productsSellerActionsController.addProduct)
 router.post('/users/seller/product/add/images',upload,productsSellerActionsController.addImageProduct)
-router.patch('/users/seller/product/edit',productsSellerActionsController.editInfoProduct)
+router.patch('/users/seller/product/edit/:id',productsSellerActionsController.editInfoProduct)
 
 export default router
