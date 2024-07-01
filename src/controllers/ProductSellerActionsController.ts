@@ -108,12 +108,9 @@ class ProductSellerActionsController{
         return res.status(401).json({message: verify})
       }
 
-      if(!getImagesOfProduct){
-        return res.status(404).json({message:'Images product not found'})
-      }
       
       const { name,price,quantity,discount,description,category } = req.body
-
+      
       const verifyCategory = new ValidateCategory().verifyCategoryExist(category || '')
       
       if(!verifyCategory){
@@ -127,8 +124,8 @@ class ProductSellerActionsController{
         return res.status(400).json({message: validate})
       }
       
-      if(Number(price) <= 0 || Number(quantity) <= 0){
-        return res.status(400).json({message: 'Price and quantity must be greater than 0'})
+      if(!getImagesOfProduct){
+        return res.status(404).json({message:'Images product not found'})
       }
 
       const sellerId = await Seller.findAll({
@@ -137,7 +134,7 @@ class ProductSellerActionsController{
           userId: id
         }
       })
-
+      
       
       const productAdd = await Product.create({
         sellerId: sellerId[0].dataValues.id,
@@ -167,6 +164,57 @@ class ProductSellerActionsController{
     catch{
       res.status(500).json({message: 'Internal server error'})
     }
+  }
+
+  public async editInfoProduct(req: Request,res: Response){
+    const verifyToken = verifyTokenUser.execute(req,res)
+    const id = verifyToken.userId || 0
+          
+    if(!verifyToken.auth){
+      return
+    }
+      
+    const verifyUserIsSeller = new VerifyUserIsSeller(id)
+        
+    const [verify,getImagesOfProduct] = await Promise.all([
+        verifyUserIsSeller.execute(),
+      client.get(`images-products-${id}`)
+    ])
+
+    if(verify){
+      return res.status(401).json({message: verify})
+    }
+
+    
+    const sellerId = await Seller.findAll({
+      attributes: ['id'],
+      where: {
+        userId: id
+      }
+    })
+    
+    const productActual = await Product.findAll({
+      where: {
+        sellerId: sellerId[0].dataValues.id
+      }
+    })
+    
+    const { name,price,quantity,discount,description,category } = req.body
+
+    const validateInfoProduct = new ValidateInfoAboutProduct()
+    const validate = validateInfoProduct.validateAllInfo(name,price,quantity,discount,description)
+
+    const verifyCategory = new ValidateCategory().verifyCategoryExist(category || '')
+
+    if(!verifyCategory){
+      return res.status(404).json({message: 'Category not found'})
+    }
+      
+    if(validate){
+      return res.status(400).json({message: validate})
+    }
+
+    res.status(200).end()
   }
 }
 
