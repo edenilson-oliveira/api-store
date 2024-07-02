@@ -62,9 +62,34 @@ class ProductSellerActionsController{
         return res.status(401).json({message: verifyAccountSeller})
       }
 
+      const productId = req.query.id
+
+      if(isNaN(Number(productId))){
+        return res.status(400).json({message: 'Id is not valid ou not provided'})
+      }
+
       const filesImagesPoducts = await client.get(`files-images-product-${id}`) || ''
       
       const files = JSON.parse(filesImagesPoducts)
+
+      if(Number(productId)){
+        const imagesOfProduct = await ImageProducts.findAll({
+          where:{
+            productId
+          }
+        })
+        
+        if(!imagesOfProduct.length){
+          return res.status(404).json({message: 'Product not found'})
+        }
+
+        if(imagesOfProduct.length + files.length >= 10){
+          return res.status(400).json({message: 'Many files, files cannot be more than 10 on database'})
+        }
+
+        return res.status(200).end()
+      }
+
 
       const uploads = await Promise.allSettled(
         files.map((value: any) => cloudinary.uploadImage(value.path))
