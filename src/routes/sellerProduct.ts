@@ -8,5 +8,6 @@ router.get('/users/seller/products',productsSellerActionsController.getProductsO
 router.post('/users/seller/product/add',productsSellerActionsController.addProduct)
 router.post('/users/seller/product/add/images',upload,productsSellerActionsController.addImageProduct)
 router.patch('/users/seller/product/edit/:id',productsSellerActionsController.editInfoProduct)
+router.post('/users/seller/product/edit/add/image/:id',upload('edit'),productsSellerActionsController.addMoreImagesProducts)
 
 export default router
