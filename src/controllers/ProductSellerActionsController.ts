@@ -62,34 +62,9 @@ class ProductSellerActionsController{
         return res.status(401).json({message: verifyAccountSeller})
       }
 
-      const productId = req.query.id
-
-      if(isNaN(Number(productId))){
-        return res.status(400).json({message: 'Id is not valid ou not provided'})
-      }
-
       const filesImagesPoducts = await client.get(`files-images-product-${id}`) || ''
       
       const files = JSON.parse(filesImagesPoducts)
-
-      if(Number(productId)){
-        const imagesOfProduct = await ImageProducts.findAll({
-          where:{
-            productId
-          }
-        })
-        
-        if(!imagesOfProduct.length){
-          return res.status(404).json({message: 'Product not found'})
-        }
-
-        if(imagesOfProduct.length + files.length >= 10){
-          return res.status(400).json({message: 'Many files, files cannot be more than 10 on database'})
-        }
-
-        return res.status(200).end()
-      }
-
 
       const uploads = await Promise.allSettled(
         files.map((value: any) => cloudinary.uploadImage(value.path))
@@ -104,7 +79,7 @@ class ProductSellerActionsController{
       })
 
       await Promise.all([
-        client.del(`files-images-product-${id}`),
+        client.del(`files-images-product-user-${id}`),
         client.set(`images-products-${id}`,JSON.stringify(imageProductsInfo))])
 
       res.status(200).end()
@@ -270,6 +245,71 @@ class ProductSellerActionsController{
       })
       
       res.status(200).end()
+    }
+    catch{
+      res.status(500).json({message: 'Internal server error'})
+    }
+  }
+  public async addMoreImagesProducts(req: Request,res: Response){
+    try{
+      const verifyToken = verifyTokenUser.execute(req,res)
+      const id = verifyToken.userId || 0
+          
+      if(!verifyToken.auth){
+        return
+      }
+      
+      const verifyUserIsSeller = new VerifyUserIsSeller(id)
+
+      const verifyAccountSeller = await verifyUserIsSeller.execute()
+
+      if(verifyAccountSeller){
+        return res.status(401).json({message: verifyAccountSeller})
+      }
+
+      const productId = req.params.id
+
+      if(isNaN(Number(productId))){
+        return res.status(400).json({message: 'Id is not valid ou not provided'})
+      }
+
+      const filesImagesPoducts = await client.get(`files-images-product-user-edit-${id}`) || ''
+      
+      const files = JSON.parse(filesImagesPoducts)
+
+      const imagesOfProduct = await ImageProducts.findAll({
+        where:{
+          productId
+        }
+      })
+        
+      if(!imagesOfProduct.length){
+        return res.status(404).json({message: 'Product not found'})
+      }
+
+      if(imagesOfProduct.length + files.length >= 10){
+        return res.status(400).json({message: 'Many files, files cannot be more than 10 on database'})
+      }
+
+      const uploads = await Promise.allSettled(
+        files.map((value: any) => cloudinary.uploadImage(value.path))
+      ).then((result: any) => {
+        return result
+      }).catch((err) => {
+        return err
+      })
+      
+
+      await Promise.all(
+        uploads.map((upload: any) => {
+          ImageProducts.create({
+            productId,
+            filename: upload.value.original_filename,
+            url: upload.value.url
+          })
+        }))
+
+      return res.status(200).end()
     }
     catch{
       res.status(500).json({message: 'Internal server error'})
