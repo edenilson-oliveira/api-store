@@ -315,6 +315,31 @@ class ProductSellerActionsController{
       res.status(500).json({message: 'Internal server error'})
     }
   }
+
+  public async deleteImage(req: Request,res: Response){
+    try{
+      const verifyToken = verifyTokenUser.execute(req,res)
+      const id = verifyToken.userId || 0
+          
+      if(!verifyToken.auth){
+        return
+      }
+      
+      const verifyUserIsSeller = new VerifyUserIsSeller(id)
+
+      const verifyAccountSeller = await verifyUserIsSeller.execute()
+
+      if(verifyAccountSeller){
+        return res.status(401).json({message: verifyAccountSeller})
+      }
+      
+      const { publicId } = req.params
+
+    }
+    catch{
+      res.status(500).json({message: 'Internal server error'})
+    }
+  }
 }
 
 export default new ProductSellerActionsController

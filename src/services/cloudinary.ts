@@ -13,11 +13,16 @@ class Cloudinary{
 
     try {
       const result = await cloudinary.uploader.upload(imagePath, options);
+      console.log(result)
       return result 
       
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      
+      throw error.error
     }
+  }
+  public async deleteImage(publicId: string){
+    cloudinary.uploader.destroy( publicId , function (resultado) { console.log(resultado) });
   }
 }
 
