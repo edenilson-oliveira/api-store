@@ -335,8 +335,27 @@ class ProductSellerActionsController{
       
       const { publicId } = req.params
 
+      if(!publicId){
+        return res.status(400).json({message: 'Public id of image not provided'})
+      }
+
+      const imagePublicId = await ImageProducts.destroy({
+        where: {
+          filename: publicId
+        }
+      })
+
+      if(!imagePublicId){
+        return res.status(404).json({message: 'Image not found'})
+      }
+
+      await cloudinary.deleteImage(publicId)
+
+      res.status(200).end()
+
     }
-    catch{
+    catch(err){
+      console.log(err)
       res.status(500).json({message: 'Internal server error'})
     }
   }
