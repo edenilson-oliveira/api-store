@@ -17,12 +17,19 @@ class Cloudinary{
       return result 
       
     } catch (error: any) {
-      
-      throw error.error
+      return error.error[0]
     }
   }
   public async deleteImage(publicId: string){
-    cloudinary.uploader.destroy( publicId , function (resultado) { console.log(resultado) });
+    await cloudinary.uploader.destroy( publicId , function (resultado) { console.log(resultado) });
+  }
+
+  public async searchImage(publicId: string){
+    const search = await cloudinary.search
+    .expression(`resource_type:image`)
+    .execute()
+
+    return search
   }
 }
 

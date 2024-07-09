@@ -339,17 +339,17 @@ class ProductSellerActionsController{
         return res.status(400).json({message: 'Public id of image not provided'})
       }
 
-      const imagePublicId = await ImageProducts.destroy({
+      const [imagePublicIdOnDatabase,imagePublicIdOnCloudinary] = await Promise.all([ImageProducts.findAll({
         where: {
           filename: publicId
         }
-      })
+      }),cloudinary.searchImage(publicId)])
 
-      if(!imagePublicId){
+      console.log(imagePublicIdOnCloudinary)
+
+      if(!imagePublicIdOnDatabase){
         return res.status(404).json({message: 'Image not found'})
       }
-
-      await cloudinary.deleteImage(publicId)
 
       res.status(200).end()
 
