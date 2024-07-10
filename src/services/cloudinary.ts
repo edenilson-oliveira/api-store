@@ -26,7 +26,7 @@ class Cloudinary{
 
   public async searchImage(publicId: string){
     const search = await cloudinary.search
-    .expression(`resource_type:image`)
+    .expression(publicId)
     .execute()
 
     return search
