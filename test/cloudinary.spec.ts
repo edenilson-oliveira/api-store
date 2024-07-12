@@ -31,7 +31,7 @@ describe('Test of upload with cloudinary', () => {
   })
   
   it('should return deleted when delete image', async () => {
-    const searchImage = await cloudinary.searchImage('node-js-image-test_rremou')
+    const searchImage = await cloudinary.searchImage('node-js-image-test')
     const deleteImage = await cloudinary.deleteImage(searchImage.resources[0].public_id)
 
     expect(deleteImage).toBeDefined()
@@ -39,7 +39,7 @@ describe('Test of upload with cloudinary', () => {
   })
   
   it('should return not found when delete image', async () => {
-    const deleteImage = await cloudinary.deleteImage('node-js-image-test_rremou')
+    const deleteImage = await cloudinary.deleteImage('node-js-image-test')
 
     console.log(deleteImage)
     expect(deleteImage).toBeUndefined()

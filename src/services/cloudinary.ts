@@ -13,6 +13,7 @@ class Cloudinary{
 
     try {
       const result = await cloudinary.uploader.upload(imagePath, options);
+
       return result 
       
     } catch (error: any) {
