@@ -13,26 +13,36 @@ describe('Test of upload with cloudinary', () => {
     //
     expect(upload).toMatch(/Error/)
   })
-  it('should return undefined when delete image', async () => {
-    const deleteImage = await cloudinary.deleteImage('path')
-
-    console.log(deleteImage)
-    expect(deleteImage).toBeDefined()
-  })
-
+  
   it('should return info about image when search', async () => {
-    const searchImage = await cloudinary.searchImage('public_id')
-
+    const searchImage = await cloudinary.searchImage('node-js-image-test')
+    
     expect(searchImage).toHaveProperty('resources')
     expect(searchImage.resources[0]).toHaveProperty('public_id')
-
+    expect(searchImage.resources[0]).toBeDefined()
+    
   })
-
+  
   it('should return resources with no any info about image when search', async () => {
-    const searchImage = await cloudinary.searchImage('public_id')
-
+    const searchImage = await cloudinary.searchImage('path')
+    
     expect(searchImage).toHaveProperty('resources')
     expect(searchImage.resources[0]).toBeUndefined()
   })
-    
+  
+  it('should return deleted when delete image', async () => {
+    const searchImage = await cloudinary.searchImage('node-js-image-test_rremou')
+    const deleteImage = await cloudinary.deleteImage(searchImage.resources[0].public_id)
+
+    expect(deleteImage).toBeDefined()
+    expect(deleteImage.deleted).toHaveProperty(searchImage.resources[0].public_id,'deleted')
+  })
+  
+  it('should return not found when delete image', async () => {
+    const deleteImage = await cloudinary.deleteImage('node-js-image-test_rremou')
+
+    console.log(deleteImage)
+    expect(deleteImage).toBeUndefined()
+  })
+  
 })

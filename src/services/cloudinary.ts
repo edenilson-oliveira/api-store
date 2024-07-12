@@ -13,7 +13,6 @@ class Cloudinary{
 
     try {
       const result = await cloudinary.uploader.upload(imagePath, options);
-      console.log(result)
       return result 
       
     } catch (error: any) {
@@ -21,7 +20,11 @@ class Cloudinary{
     }
   }
   public async deleteImage(publicId: string){
-    await cloudinary.uploader.destroy( publicId , function (resultado) { console.log(resultado) });
+    const responseDelete = await cloudinary.api.delete_resources([publicId], 
+      { type: 'upload', resource_type: 'image' })
+    .then((response: any) => response)
+
+    return responseDelete
   }
 
   public async searchImage(publicId: string){
