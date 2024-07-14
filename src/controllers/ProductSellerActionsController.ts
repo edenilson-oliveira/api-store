@@ -345,25 +345,29 @@ class ProductSellerActionsController{
         }
       }),cloudinary.searchImage(publicId)])
 
-      console.log(imagePublicIdOnCloudinary)
-      console.log(imagePublicIdOnDatabase)
 
       if(!imagePublicIdOnDatabase[0]){
-        if(imagePublicIdOnCloudinary.resources[0]){[[
-          await cloudinary.deleteImage(publicId)
-        ]]}
+        if(imagePublicIdOnCloudinary.resources[0]){
+          await cloudinary.deleteImage(imagePublicIdOnCloudinary.resources[0].public_id)
+          return res.status(200).json({message: 'Image not found on database but found and deleted on cloudinary'})
+        }
         return res.status(404).json({message: 'Image not found'})
+      }
+
+      if(!imagePublicIdOnCloudinary.resources[0] && imagePublicIdOnDatabase[0]){
+        await ImageProducts.destroy({
+          where: {
+            filename: publicId
+          }
+        })
+        return res.status(200).json({message: 'Image not found on cloudinary but found and deleted on database'})
       }
 
       const [deleteImageOnDatabase,deleteImageOnCloudinary] = await Promise.all([ImageProducts.destroy({
         where: {
           filename: publicId
         }
-      }), cloudinary.deleteImage(publicId)])
-
-      console.log(deleteImageOnCloudinary)
-
-
+      }), cloudinary.deleteImage(imagePublicIdOnCloudinary.resources[0].public_id)])
 
       res.status(200).end()
 
