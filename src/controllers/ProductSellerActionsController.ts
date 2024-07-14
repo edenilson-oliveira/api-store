@@ -67,7 +67,7 @@ class ProductSellerActionsController{
       const files = JSON.parse(filesImagesPoducts)
 
       const uploads = await Promise.allSettled(
-        files.map((value: any) => cloudinary.uploadImage(value.path))
+        files.map((value: any) => cloudinary.uploadImage('value.path'))
       ).then((result: any) => {
         return result
       }).catch((err) => {
@@ -369,8 +369,61 @@ class ProductSellerActionsController{
         }
       }), cloudinary.deleteImage(imagePublicIdOnCloudinary.resources[0].public_id)])
 
-      res.status(200).end()
+      res.status(204).end()
 
+    }
+    catch{
+      res.status(500).json({message: 'Internal server error'})
+    }
+  }
+
+  public async deleteProduct(req: Request,res: Response){
+    try{
+      const verifyToken = verifyTokenUser.execute(req,res)
+      const id = verifyToken.userId || 0
+            
+      if(!verifyToken.auth){
+          return
+      }
+        
+      const verifyUserIsSeller = new VerifyUserIsSeller(id)
+
+      const verifyAccountSeller = await verifyUserIsSeller.execute()
+
+      if(verifyAccountSeller){
+        return res.status(401).json({message: verifyAccountSeller})
+      }
+
+      const productId = req.params.id
+
+      if(!productId || isNaN(Number(productId))){
+        return res.status(400).json({message: 'Product id is not valid'})
+      }
+
+      const [deleteInfoProduct,deleteImageProduct,imagesOfProduct] = await Promise.all([
+        Product.destroy({
+          where: {
+            id: productId
+          }
+        }),
+        ImageProducts.destroy({
+          where: {
+            productId
+          }
+        }),
+        ImageProducts.findAll({
+          where: {
+            productId
+          }
+        })
+      ])
+
+      
+      if(!deleteInfoProduct){
+        return res.status(404).json({message: 'Product not found'})
+      }
+
+      res.status(204).end()
     }
     catch{
       res.status(500).json({message: 'Internal server error'})

@@ -10,5 +10,6 @@ router.post('/users/seller/product/add/images',upload,productsSellerActionsContr
 router.patch('/users/seller/product/edit/:id',productsSellerActionsController.editInfoProduct)
 router.post('/users/seller/product/edit/add/image/:id',upload('edit'),productsSellerActionsController.addMoreImagesProducts)
 router.delete('/users/seller/products/edit/delete/image/:publicId',productsSellerActionsController.deleteImage)
+router.delete('/users/seller/products/delete/:id',productsSellerActionsController.deleteProduct)
 
 export default router
