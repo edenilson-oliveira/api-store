@@ -372,8 +372,7 @@ class ProductSellerActionsController{
       res.status(200).end()
 
     }
-    catch(err){
-      console.log(err)
+    catch{
       res.status(500).json({message: 'Internal server error'})
     }
   }
