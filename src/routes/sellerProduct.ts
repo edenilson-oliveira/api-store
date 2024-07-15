@@ -6,7 +6,7 @@ const router = express.Router()
 
 router.get('/users/seller/products',productsSellerActionsController.getProductsOfStore)
 router.post('/users/seller/product/add',productsSellerActionsController.addProduct)
-router.post('/users/seller/product/add/images',upload,productsSellerActionsController.addImageProduct)
+router.post('/users/seller/product/add/images',upload(''),productsSellerActionsController.addImageProduct)
 router.patch('/users/seller/product/edit/:id',productsSellerActionsController.editInfoProduct)
 router.post('/users/seller/product/edit/add/image/:id',upload('edit'),productsSellerActionsController.addMoreImagesProducts)
 router.delete('/users/seller/products/edit/delete/image/:publicId',productsSellerActionsController.deleteImage)

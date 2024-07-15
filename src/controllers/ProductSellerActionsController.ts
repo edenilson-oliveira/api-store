@@ -67,16 +67,23 @@ class ProductSellerActionsController{
       const files = JSON.parse(filesImagesPoducts)
 
       const uploads = await Promise.allSettled(
-        files.map((value: any) => cloudinary.uploadImage('value.path'))
+        files.map((value: any) => cloudinary.uploadImage(value.path))
       ).then((result: any) => {
         return result
       }).catch((err) => {
         return err
       })
-      
+
       const imageProductsInfo = uploads.map((upload: any) => {
+        if(!upload.value){
+          return 
+        }
         return { filename: upload.value.original_filename, url: upload.value.url}
       })
+
+      if(!imageProductsInfo){
+        return res.status(400).json({message: 'Upload failed'})
+      }
 
       await Promise.all([
         client.del(`files-images-product-user-${id}`),
@@ -84,7 +91,8 @@ class ProductSellerActionsController{
 
       res.status(200).end()
     }
-    catch{
+    catch(err){
+      console.log(err)
       res.status(500).json({message: 'Internal server error'})
     }
   }
@@ -161,7 +169,8 @@ class ProductSellerActionsController{
       res.status(200).end()
 
     }
-    catch{
+    catch(err){
+      console.log(err)
       res.status(500).json({message: 'Internal server error'})
     }
   }
@@ -417,6 +426,8 @@ class ProductSellerActionsController{
           }
         })
       ])
+
+      console.log(imagesOfProduct)
 
       
       if(!deleteInfoProduct){
