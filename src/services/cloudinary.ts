@@ -13,11 +13,11 @@ class Cloudinary{
 
     try {
       const result = await cloudinary.uploader.upload(imagePath, options);
-
+      //console.log(result)
       return result 
       
     } catch (error: any) {
-      return error.error[0]
+      throw new Error(error.error)
     }
   }
   public async deleteImage(publicId: string){

@@ -9,7 +9,7 @@ const uploadValidate = (resource: string) => async (req: Request, res: Response,
     const { token } = verifyToken.getBearerHeaderData()
     const verifyTokenUser = verifyToken.getTokenOnly(token)
     const id = Number(verifyTokenUser.id)
-    console.log(id)
+    
     if(!id){
         return next()
     }
@@ -18,9 +18,9 @@ const uploadValidate = (resource: string) => async (req: Request, res: Response,
         if(err){
             return res.status(400).json({message: err.message})
         }
-        console.log('teste')
+        console.log(`files-images-product-user-${req.params.id ? `${resource}-`:''}${id}`)
         await client.set(`files-images-product-user-${req.params.id ? `${resource}-`:''}${id}`,JSON.stringify(req.files))
-        client.expire(`files-images-product-user-${req.params.id ? `${resource}-`:''}${id}`, 60)
+        await client.expire(`files-images-product-user-${req.params.id ? `${resource}-`:''}${id}`, 60)
         next()
     })
         

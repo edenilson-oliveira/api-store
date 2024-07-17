@@ -62,9 +62,11 @@ class ProductSellerActionsController{
         return res.status(401).json({message: verifyAccountSeller})
       }
 
-      const filesImagesPoducts = await client.get(`files-images-product-${id}`) || ''
+      const filesImagesPoducts = await client.get(`files-images-product-user-${id}`) || ''
       
       const files = JSON.parse(filesImagesPoducts)
+
+      console.log(filesImagesPoducts)
 
       const uploads = await Promise.allSettled(
         files.map((value: any) => cloudinary.uploadImage(value.path))
@@ -74,16 +76,14 @@ class ProductSellerActionsController{
         return err
       })
 
+      if(uploads[0].status === 'rejected'){
+        return res.status(400).json({message: 'Upload failed'})
+      }
+
       const imageProductsInfo = uploads.map((upload: any) => {
-        if(!upload.value){
-          return 
-        }
         return { filename: upload.value.original_filename, url: upload.value.url}
       })
 
-      if(!imageProductsInfo){
-        return res.status(400).json({message: 'Upload failed'})
-      }
 
       await Promise.all([
         client.del(`files-images-product-user-${id}`),
@@ -131,11 +131,12 @@ class ProductSellerActionsController{
       if(validate){
         return res.status(400).json({message: validate})
       }
-      
+
       if(!getImagesOfProduct){
+        console.log('teste')
         return res.status(404).json({message:'Images product not found'})
       }
-
+      
       const sellerId = await Seller.findAll({
         attributes: ['id'],
         where: {
@@ -153,9 +154,10 @@ class ProductSellerActionsController{
         description: description || '',
         category: category || ''
       })
-
+      
       const imageProductsInfo = JSON.parse(getImagesOfProduct)
-
+      
+      
       await Promise.all([
         imageProductsInfo.map((value: any) => {
           ImageProducts.create({
@@ -169,8 +171,7 @@ class ProductSellerActionsController{
       res.status(200).end()
 
     }
-    catch(err){
-      console.log(err)
+    catch{
       res.status(500).json({message: 'Internal server error'})
     }
   }
