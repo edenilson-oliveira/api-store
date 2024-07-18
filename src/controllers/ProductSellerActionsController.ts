@@ -66,8 +66,6 @@ class ProductSellerActionsController{
       
       const files = JSON.parse(filesImagesPoducts)
 
-      console.log(filesImagesPoducts)
-
       const uploads = await Promise.allSettled(
         files.map((value: any) => cloudinary.uploadImage(value.path))
       ).then((result: any) => {
@@ -91,8 +89,7 @@ class ProductSellerActionsController{
 
       res.status(200).end()
     }
-    catch(err){
-      console.log(err)
+    catch{
       res.status(500).json({message: 'Internal server error'})
     }
   }
@@ -133,7 +130,6 @@ class ProductSellerActionsController{
       }
 
       if(!getImagesOfProduct){
-        console.log('teste')
         return res.status(404).json({message:'Images product not found'})
       }
       
@@ -422,13 +418,20 @@ class ProductSellerActionsController{
           }
         }),
         ImageProducts.findAll({
+          attributes: ['filename'],
           where: {
             productId
           }
         })
       ])
 
-      console.log(imagesOfProduct)
+      const imagesOnCloudinary = await Promise.all(imagesOfProduct.map((value: ImageProducts) => {
+        return cloudinary.searchImage(value.dataValues.filename)
+      }))
+
+      const deleteImagesOnCloudinary = await Promise.all(imagesOnCloudinary.map((value: any) => {
+        return cloudinary.deleteImage(value.resources[0].public_id)
+      }))
 
       
       if(!deleteInfoProduct){
