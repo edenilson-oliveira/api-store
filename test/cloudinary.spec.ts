@@ -3,15 +3,15 @@ import cloudinary from '../src/services/cloudinary';
 describe('Test of upload with cloudinary', () => {
   it('should upload image with sucess', async () => {
     const upload = await cloudinary.uploadImage('test/node-js-image-test.png')
-    console.log(upload)
+    
     expect(upload).toBeDefined()
   })
 
   it('should return error on upload image with sucess', async () => {
     const upload = await cloudinary.uploadImage('path')
     console.log(upload)
-    //
-    expect(upload).toMatch(/Error/)
+
+    expect(upload).toThrow()
   })
   
   it('should return info about image when search', async () => {
@@ -42,7 +42,8 @@ describe('Test of upload with cloudinary', () => {
     const deleteImage = await cloudinary.deleteImage('node-js-image-test')
 
     console.log(deleteImage)
-    expect(deleteImage).toBeUndefined()
+    expect(deleteImage).toBeDefined()
+    expect(deleteImage.deleted).toHaveProperty('node-js-image-test','not_found')
   })
   
 })

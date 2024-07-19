@@ -14,7 +14,7 @@ import { error } from 'console';
 import ImageProducts from '../database/models/image-products';
 
 class ProductSellerActionsController{
-  public async getProductsOfStore(req: Request,res: Response){
+  public async getAllProductsOfStore(req: Request,res: Response){
     try{
       const verifyToken = verifyTokenUser.execute(req,res)
       const id = verifyToken.userId || 0
@@ -30,15 +30,63 @@ class ProductSellerActionsController{
       if(verify){
         return res.status(401).json({message: verify})
       }
-      
-      const products = Product.findAll({
+
+      const sellerId: Seller[] = await Seller.findAll({
+        attributes: ['id'],
         where: {
-          sellerId: id
+          userId: id
+        }
+      })
+
+      const products: Product[] = await Product.findAll({
+        where: {
+          sellerId: sellerId[0].dataValues.id
         },
         limit: 20
       })
+
+      res.status(200).json({products})
+    }
+    catch{
+      res.status(500).json({message: 'Internal server error'})
+    }
+  }
+
+  public async getProductById(req: Request,res: Response){
+    try{
+      const verifyToken = verifyTokenUser.execute(req,res)
+      const id = verifyToken.userId || 0
+          
+      if(!verifyToken.auth){
+        return
+      }
+        
+      const verifyUserIsSeller = new VerifyUserIsSeller(id)
+        
+      const verify = await verifyUserIsSeller.execute()
+        
+      if(verify){
+        return res.status(401).json({message: verify})
+      }
+
+      const productId = req.params.id
+
+      if(!Number(productId)){
+        return res.status(400).json({message: 'Product id is not valid'})
+      }
+
+      const [products,imagesOfProducts] = await Promise.all([Product.findAll({
+        where: {
+          id: productId
+        },
+        limit: 20
+      }),ImageProducts.findAll({
+        where: {
+          id: productId
+        }
+      })])
       
-      res.status(200).json(products)
+      res.status(200).json({products,imagesOfProducts})
     }
     catch{
       res.status(500).json({message: 'Internal server error'})

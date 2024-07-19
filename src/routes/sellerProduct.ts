@@ -4,7 +4,8 @@ import productsSellerActionsController from '../controllers/ProductSellerActions
 
 const router = express.Router()
 
-router.get('/users/seller/products',productsSellerActionsController.getProductsOfStore)
+router.get('/users/seller/products',productsSellerActionsController.getAllProductsOfStore)
+router.get('/users/seller/product/:id',productsSellerActionsController.getProductById)
 router.post('/users/seller/product/add',productsSellerActionsController.addProduct)
 router.post('/users/seller/product/add/images',upload(''),productsSellerActionsController.addImageProduct)
 router.patch('/users/seller/product/edit/:id',productsSellerActionsController.editInfoProduct)

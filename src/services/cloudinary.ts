@@ -1,8 +1,8 @@
-import { UploadApiOptions } from 'cloudinary';
+import { UploadApiOptions,UploadApiResponse } from 'cloudinary';
 import cloudinary from '../config/cloudinaryConfig';
 
 class Cloudinary{
-  public async uploadImage(imagePath: string){
+  public async uploadImage(imagePath: string): Promise<UploadApiResponse | never>{
     const options: UploadApiOptions = {
       use_filename: true,
       unique_filename: true,
@@ -13,7 +13,6 @@ class Cloudinary{
 
     try {
       const result = await cloudinary.uploader.upload(imagePath, options);
-      //console.log(result)
       return result 
       
     } catch (error: any) {
@@ -28,7 +27,7 @@ class Cloudinary{
     return responseDelete
   }
 
-  public async searchImage(publicId: string){
+  public async searchImage(publicId: string): Promise<UploadApiResponse>{
     const search = await cloudinary.search
     .expression(publicId)
     .execute()
