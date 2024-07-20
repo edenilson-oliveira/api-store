@@ -42,10 +42,32 @@ class ProductSellerActionsController{
         where: {
           sellerId: sellerId[0].dataValues.id
         },
-        limit: 20
+        limit: 10
       })
 
-      res.status(200).json({products})
+      const [imagesOfProducts]: ImageProducts[][] = await Promise.all(products.map((value: Product) => {
+        console.log(value.dataValues.id)
+        return ImageProducts.findAll({
+          where: {
+            productId: value.dataValues.id
+          }
+        })
+      }))
+      
+
+      const response = products.map((value: Product,index: number) => {
+        let imagesOfProductByProductId = []
+        if(value.dataValues.id === imagesOfProducts[index].dataValues.productId){
+          imagesOfProductByProductId[index] = imagesOfProducts[0].dataValues[index]
+        }
+
+        return {
+          product: value.dataValues,
+          images: imagesOfProductByProductId
+        }
+      })
+
+      res.status(200).json({response})
     }
     catch{
       res.status(500).json({message: 'Internal server error'})
@@ -82,7 +104,7 @@ class ProductSellerActionsController{
         limit: 20
       }),ImageProducts.findAll({
         where: {
-          id: productId
+          productId
         }
       })])
       
