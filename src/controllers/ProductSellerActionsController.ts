@@ -1,4 +1,5 @@
 import { Request,Response,NextFunction } from 'express';
+import { Op } from 'sequelize'
 import Seller from '../database/models/seller';
 import Product from '../database/models/product';
 import verifyTokenUser from '../authentication/VerifyToken';
@@ -45,31 +46,20 @@ class ProductSellerActionsController{
         limit: 10
       })
 
-      const [imagesOfProducts]: ImageProducts[][] = await Promise.all(products.map((value: Product) => {
-        console.log(value.dataValues.id)
-        return ImageProducts.findAll({
-          where: {
-            productId: value.dataValues.id
-          }
-        })
-      }))
-      
-
-      const response = products.map((value: Product,index: number) => {
-        let imagesOfProductByProductId = []
-        if(value.dataValues.id === imagesOfProducts[index].dataValues.productId){
-          imagesOfProductByProductId[index] = imagesOfProducts[0].dataValues[index]
-        }
-
-        return {
-          product: value.dataValues,
-          images: imagesOfProductByProductId
-        }
+      const returnIdOfProducts = products.map((value: Product) => {
+        return {productId: value.dataValues.id}
       })
 
-      res.status(200).json({response})
+      const images = await ImageProducts.findAll({
+        where: {
+          [Op.or]: returnIdOfProducts
+        }
+      })
+      
+      res.status(200).json({products,images})
     }
-    catch{
+    catch(err){
+      console.log(err)
       res.status(500).json({message: 'Internal server error'})
     }
   }
