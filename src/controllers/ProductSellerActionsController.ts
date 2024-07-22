@@ -55,8 +55,16 @@ class ProductSellerActionsController{
           [Op.or]: returnIdOfProducts
         }
       })
-      
-      res.status(200).json({products,images})
+     
+      const response = products.map((value: Product) => {
+        const imagesResponse = images.filter((image: ImageProducts) => image.dataValues.productId === value.dataValues.id)
+        return {
+          product: value,
+          images: imagesResponse
+        }
+      })
+
+      res.status(200).json(response)
     }
     catch(err){
       console.log(err)

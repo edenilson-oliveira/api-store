@@ -12,7 +12,7 @@ const upload = multer({
   storage,
   limits: {
     fileSize: 5 * 1024 * 1024,
-    files: 5
+    files: 10
   },
   fileFilter(req: Request, file:Express.Multer.File, callback: FileFilterCallback) {
     if(!(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png')){
