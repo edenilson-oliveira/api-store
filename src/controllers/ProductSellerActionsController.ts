@@ -50,24 +50,29 @@ class ProductSellerActionsController{
         return {productId: value.dataValues.id}
       })
 
-      const images = await ImageProducts.findAll({
-        where: {
-          [Op.or]: returnIdOfProducts
-        }
-      })
-     
+      const images: ImageProducts[] = []
+
+      await Promise.all(products.map(async (value: Product) => {
+        const [imagesRequest] = await ImageProducts.findAll({
+          where: {
+            productId: value.dataValues.id
+          },
+          limit: 1
+        })
+        images.push(imagesRequest)
+      }))
+       
       const response = products.map((value: Product) => {
-        const imagesResponse = images.filter((image: ImageProducts) => image.dataValues.productId === value.dataValues.id)
+        const [imagesResponse] = images.filter((image: ImageProducts) => image.dataValues.productId === value.dataValues.id)
         return {
           product: value,
-          images: imagesResponse
+          image: imagesResponse
         }
       })
 
       res.status(200).json(response)
     }
-    catch(err){
-      console.log(err)
+    catch{
       res.status(500).json({message: 'Internal server error'})
     }
   }
@@ -99,7 +104,6 @@ class ProductSellerActionsController{
         where: {
           id: productId
         },
-        limit: 20
       }),ImageProducts.findAll({
         where: {
           productId
