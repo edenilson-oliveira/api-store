@@ -50,6 +50,10 @@ class ProductSellerActionsController{
         return {productId: value.dataValues.id}
       })
 
+      if(!returnIdOfProducts[0].productId){
+        return res.status(404).json({message: 'Products not found'})
+      }
+
       const images: ImageProducts[] = []
 
       await Promise.all(products.map(async (value: Product) => {
