@@ -50,7 +50,7 @@ class ProductSellerActionsController{
         return {productId: value.dataValues.id}
       })
 
-      if(!returnIdOfProducts[0].productId){
+      if(!returnIdOfProducts.length){
         return res.status(404).json({message: 'Products not found'})
       }
 
@@ -138,7 +138,7 @@ class ProductSellerActionsController{
         return res.status(401).json({message: verifyAccountSeller})
       }
 
-      const filesImagesPoducts = await client.get(`files-images-product-user-${id}`) || ''
+      const filesImagesPoducts = await client.get(`files-images-product-user-${id}`) as string
       
       const files = JSON.parse(filesImagesPoducts)
 

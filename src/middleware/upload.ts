@@ -18,7 +18,11 @@ const uploadValidate = (resource: string) => async (req: Request, res: Response,
         if(err){
             return res.status(400).json({message: err.message})
         }
-        console.log(`files-images-product-user-${req.params.id ? `${resource}-`:''}${id}`)
+
+        if(!req.files){
+            return res.status(400).json({message: 'Error with the files'})
+        }
+        
         await client.set(`files-images-product-user-${req.params.id ? `${resource}-`:''}${id}`,JSON.stringify(req.files))
         await client.expire(`files-images-product-user-${req.params.id ? `${resource}-`:''}${id}`, 60)
         next()
