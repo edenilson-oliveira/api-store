@@ -1,5 +1,5 @@
 import { Request,Response,NextFunction } from 'express';
-import { Op } from 'sequelize'
+import { NUMBER, Op } from 'sequelize'
 import Seller from '../database/models/seller';
 import Product from '../database/models/product';
 import verifyTokenUser from '../authentication/VerifyToken';
@@ -39,19 +39,39 @@ class ProductSellerActionsController{
         }
       })
 
+      const limit = Number(req.query.limit) < 10 ? Number(req.query.limit) : 10
+      const page = Number(req.query.page) || 1
+      
+      const productsCount = await Product.count({
+        where: {
+          sellerId: sellerId[0].dataValues.id
+        },
+      })
+
       const products: Product[] = await Product.findAll({
         where: {
           sellerId: sellerId[0].dataValues.id
         },
-        limit: 10
+        offset: Number(page * limit) - limit,
+        limit
       })
 
       const returnIdOfProducts = products.map((value: Product) => {
         return {productId: value.dataValues.id}
       })
 
+      const pagination = {
+        totalResults: products.length,
+        productsCount
+      }
+
       if(!returnIdOfProducts.length){
-        return res.status(404).json({message: 'Products not found'})
+        return res.status(200).json([{
+          product: {},
+          image: {}
+        },{
+          pagination
+        }])
       }
 
       const images: ImageProducts[] = []
@@ -74,7 +94,7 @@ class ProductSellerActionsController{
         }
       })
 
-      res.status(200).json(response)
+      res.status(200).json({response,pagination})
     }
     catch{
       res.status(500).json({message: 'Internal server error'})
