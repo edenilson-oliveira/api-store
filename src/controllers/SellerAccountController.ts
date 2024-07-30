@@ -184,7 +184,7 @@ class SellerAccountController{
         sellerInfoOnCache.edit({id,email,phone: ''})
         await Seller.update({emailStore: email},{
           where: {
-            id
+            userid: id
           }
         })
         
@@ -288,7 +288,7 @@ class SellerAccountController{
         sellerInfoOnCache.edit({id,email: '',phone})
         await Seller.update({phone},{
           where: {
-            id
+            userId: id
           }
         })
         
