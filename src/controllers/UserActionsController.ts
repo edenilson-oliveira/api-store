@@ -53,6 +53,141 @@ class UserActionsController{
             res.status(500).json({message: 'Internal server error'})
         }
     }
+
+    public async increaseQuantityOfProductOnCart(req: Request,res: Response){
+        try{
+            const verifyToken = verifyTokenUser.execute(req,res)
+            const id = verifyToken.userId || 0
+            
+            if(!verifyToken.auth){
+                return
+            }
+
+            const productId = req.params.id
+
+            if(!Number(productId)){
+                return res.status(400).json({message: 'Product id is not valid'})
+            }
+
+            const [getProduct,productOnCart] = await Promise.all([Product.findAll({
+                where: {
+                    id: productId
+                }
+            }), Cart.findAll({
+                where: {
+                    productId
+                }
+            })])
+
+            if(!productOnCart.length){
+                return res.status(404).json({message: 'Product not found on cart'})
+            }
+
+            if(productOnCart[0].dataValues.quantity + 1 > getProduct[0].dataValues.quantity){
+                return res.status(409).json({message: `Error, quantity not must be than ${getProduct[0].dataValues.quantity}`})
+            }
+
+            await Cart.update({
+                quantity: productOnCart[0].dataValues.quantity + 1
+            },{
+                where: {
+                    productId
+                }
+            })
+
+            res.status(200).end()
+        }
+        catch{
+            res.status(500).json({message: 'Internal server error'})
+        }
+    }
+
+    public async decreaseQuantityOfProductOnCart(req: Request,res: Response){
+        try{
+            const verifyToken = verifyTokenUser.execute(req,res)
+            const id = verifyToken.userId || 0
+            
+            if(!verifyToken.auth){
+                return
+            }
+
+            const productId = req.params.id
+
+            if(!Number(productId)){
+                return res.status(400).json({message: 'Product id is not valid'})
+            }
+
+            const [getProduct,productOnCart] = await Promise.all([Product.findAll({
+                where: {
+                    id: productId
+                }
+            }), Cart.findAll({
+                where: {
+                    productId
+                }
+            })])
+
+            if(!productOnCart.length){
+                return res.status(404).json({message: 'Product not found on cart'})
+            }
+
+            if(productOnCart[0].dataValues.quantity - 1 <= 0){
+                return res.status(409).json({message: `Error, quantity must be than 1`})
+            }
+
+            await Cart.update({
+                quantity: productOnCart[0].dataValues.quantity - 1
+            },{
+                where: {
+                    productId
+                }
+            })
+
+            res.status(200).end()
+        }
+        catch{
+            res.status(500).json({message: 'Internal server error'})
+        }
+    }
+
+    public async removeProductOnCart(req: Request,res: Response){
+        try{
+            const verifyToken = verifyTokenUser.execute(req,res)
+            const id = verifyToken.userId || 0
+            
+            if(!verifyToken.auth){
+                return
+            }
+
+            const productId = req.params.id
+
+            if(!Number(productId)){
+                return res.status(400).json({message: 'Product id is not valid'})
+            }
+
+            const productOnCart = await Cart.findAll({
+                where: {
+                    productId
+                }
+            })
+
+            if(!productOnCart.length){
+                return res.status(404).json({message: 'Product not found on cart'})
+            }
+
+            await Cart.destroy({
+                where: {
+                    productId
+                }
+            })
+
+            res.status(200).end()
+
+        }
+        catch{
+            res.status(500).json({message: 'Internal server error'})
+        }
+    }
 }
 
 export default new UserActionsController
