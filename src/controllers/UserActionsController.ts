@@ -1,13 +1,58 @@
 import { Request,Response,NextFunction } from 'express';
-import verifyTokenUser from "../authentication/VerifyToken"
+import verifyTokenUser from '../authentication/VerifyToken';
+import Product from '../database/models/product';
+import Cart from '../database/models/cart';
 
 class UserActionsController{
     public async addProductOnCart(req: Request,res: Response){
-        const verifyToken = verifyTokenUser.execute(req,res)
-        const id = verifyToken.userId || 0
-          
-        if(!verifyToken.auth){
-            return
+        try{
+            const verifyToken = verifyTokenUser.execute(req,res)
+            const id = verifyToken.userId || 0
+            
+            if(!verifyToken.auth){
+                return
+            }
+
+            const {productId,quantity} = req.body
+
+            if(!Number(productId) || !Number(quantity)){
+                return res.status(400).json({message: 'Error value is not valid'})
+            }
+
+            const [getProduct,productOnCart] = await Promise.all([Product.findAll({
+                where: {
+                    id: productId
+                }
+            }), Cart.findAll({
+                where: {
+                    productId
+                }
+            })])
+
+            if(!getProduct.length){
+                return res.status(404).json({message: 'Product not found'})
+            }
+
+            if(quantity > getProduct[0].dataValues.quantity){
+                return res.status(400).json({message: `Error, quantity not must be than ${getProduct[0].dataValues.quantity}`})
+            }
+
+            if(productOnCart.length){
+                return res.status(409).json({message: 'Error, product already exist on cart'})
+            }
+
+            await Cart.create({
+                userId: id,
+                productId,
+                quantity: quantity
+            })
+
+            res.status(200).end()
+        }
+        catch{
+            res.status(500).json({message: 'Internal server error'})
         }
     }
 }
+
+export default new UserActionsController
