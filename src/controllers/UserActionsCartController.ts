@@ -4,6 +4,7 @@ import Product from '../database/models/product';
 import Cart from '../database/models/cart';
 
 class UserActionsCartController{
+
     public async addProductOnCart(req: Request,res: Response){
         try{
             const verifyToken = verifyTokenUser.execute(req,res)
@@ -48,6 +49,33 @@ class UserActionsCartController{
             })
 
             res.status(200).end()
+        }
+        catch{
+            res.status(500).json({message: 'Internal server error'})
+        }
+    }
+
+    public async getProductsOnCart(req: Request,res: Response){
+        try{
+            const verifyToken = verifyTokenUser.execute(req,res)
+            const id = verifyToken.userId || 0
+            
+            if(!verifyToken.auth){
+                return
+            }
+
+            const limit = Number(req.query.limit) < 10 ? Number(req.query.limit) : 10
+            const page = Number(req.query.page) || 1
+
+            const productsOnCart = await Cart.findAll({
+                where: {
+                  userId: id                
+                },
+                offset: page * limit - limit,
+                limit: limit
+            })
+
+            res.status(200).json(productsOnCart)
         }
         catch{
             res.status(500).json({message: 'Internal server error'})
