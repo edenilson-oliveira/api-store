@@ -23,6 +23,10 @@ module.exports = {up: async (queryInterface, Sequelize) => {
           type: Sequelize.INTEGER,
           allowNull: false
         },
+        price: {
+          type: Sequelize.FLOAT,
+          allowNull: false
+        },
         createdAt: {
           allowNull: false,
           type: Sequelize.DATE,
