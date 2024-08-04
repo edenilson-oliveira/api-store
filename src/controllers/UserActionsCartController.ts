@@ -3,7 +3,7 @@ import verifyTokenUser from '../authentication/VerifyToken';
 import Product from '../database/models/product';
 import Cart from '../database/models/cart';
 
-class UserActionsController{
+class UserActionsCartController{
     public async addProductOnCart(req: Request,res: Response){
         try{
             const verifyToken = verifyTokenUser.execute(req,res)
@@ -190,4 +190,4 @@ class UserActionsController{
     }
 }
 
-export default new UserActionsController
+export default new UserActionsCartController
