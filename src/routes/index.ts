@@ -7,6 +7,7 @@ import products from './products'
 import sellerProduct from './sellerProduct'
 import sellerAccount from './sellerAccount'
 import userActionsCart from './userActionsCart'
+import userPurchase from './userPurchase'
 
 const router = express.Router()
 
@@ -18,5 +19,6 @@ router.use(sellerAccount)
 router.use(products)
 router.use(sellerProduct)
 router.use(userActionsCart)
+router.use(userPurchase)
 
 export default router
