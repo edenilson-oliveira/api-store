@@ -4,7 +4,7 @@ const { type } = require('os');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('payment', {
+    await queryInterface.createTable('orders-products', {
         id: {
           type: Sequelize.INTEGER,
           autoIncrement: true,
@@ -15,11 +15,15 @@ module.exports = {up: async (queryInterface, Sequelize) => {
           type: Sequelize.INTEGER,
           allowNull: false
         },
-        paymentMethod: {
-          type: Sequelize.STRING,
+        productId: {
+          type: Sequelize.INTEGER,
           allowNull: false
         },
-        value: {
+        quantity: {
+          type: Sequelize.INTEGER,
+          allowNull: false
+        },
+        price: {
           type: Sequelize.FLOAT,
           allowNull: false
         },
@@ -37,6 +41,6 @@ module.exports = {up: async (queryInterface, Sequelize) => {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('payment');
+    await queryInterface.dropTable('orders-products');
   }
 };

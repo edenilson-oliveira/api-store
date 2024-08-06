@@ -4,23 +4,23 @@ const { type } = require('os');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('payment', {
+    await queryInterface.createTable('orders', {
         id: {
           type: Sequelize.INTEGER,
           autoIncrement: true,
           allowNull: false,
           primaryKey: true,
         },
-        orderId: {
+        userId: {
           type: Sequelize.INTEGER,
           allowNull: false
         },
-        paymentMethod: {
-          type: Sequelize.STRING,
+        price: {
+          type: Sequelize.FLOAT,
           allowNull: false
         },
-        value: {
-          type: Sequelize.FLOAT,
+        status: {
+          type: Sequelize.STRING,
           allowNull: false
         },
         createdAt: {
@@ -37,6 +37,6 @@ module.exports = {up: async (queryInterface, Sequelize) => {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('payment');
+    await queryInterface.dropTable('orders');
   }
 };
