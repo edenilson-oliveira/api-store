@@ -1,12 +1,61 @@
 import { Request, Response } from 'express';
 import verifyTokenUser from '../authentication/VerifyToken';
 import Cart from '../database/models/cart';
-import Shopping from '../database/models/shopping';
+import Orders from '../database/models/orders';
 import Product from '../database/models/product';
-import PurchasedItems from '../database/models/purchasedItems';
+import OrdersProducts from '../database/models/ordersProducts';
 
 class UserPurchaseController{
-    public async createOrder(req: Request,res: Response){
+    public async addOrder(req: Request,res: Response){
+        try{
+            const verifyToken = verifyTokenUser.execute(req,res)
+            const id = verifyToken.userId || 0
+            
+            if(!verifyToken.auth){
+                return
+            }
+
+            const {productId,quantity} = req.body
+
+            if(!Number(productId) || !Number(quantity)){
+                return res.status(400).json({message: 'Error value is not valid'})
+            }
+
+            const product = await Product.findAll({
+                where: {
+                    id: productId
+                }
+            })
+
+            if(quantity > product[0].dataValues.quantity){
+                return res.status(400).json({message: `Error, quantity not must be than ${product[0].dataValues.quantity}`})
+            }
+
+            
+            const newOrder = await Orders.create({
+                userId: id,
+                price: product[0].dataValues.price * quantity,
+                status: 'pending'
+            })
+
+            await OrdersProducts.create({
+                purchaseId: newOrder.dataValues.id,
+                productId: product[0].dataValues.id,
+                quantity: quantity,
+                price: product[0].dataValues.quantity * quantity
+            })
+
+
+            res.status(200).end()
+
+        }
+        catch(err){
+            console.log(err)
+            res.status(500).json({message: 'Internal server error'})
+        }
+    }
+
+    public async addOrderOfProductsOnCart(req: Request,res: Response){
         try{
             const verifyToken = verifyTokenUser.execute(req,res)
             const id = verifyToken.userId || 0
@@ -41,18 +90,18 @@ class UserPurchaseController{
             }))
 
             
-            const newPurchase = await Shopping.create({
+            const newOrder = await Orders.create({
                 userId: id,
                 price: priceTotal,
                 status: 'pending'
             })
 
             await Promise.all(products.map(async(value: Product,index: number) => {
-                await PurchasedItems.create({
-                    purchaseId: newPurchase.dataValues.id,
+                await OrdersProducts.create({
+                    purchaseId: newOrder.dataValues.id,
                     productId: value.dataValues.id,
                     quantity: productsOnCart[index].dataValues.quantity,
-                    price: value.dataValues.price
+                    price: value.dataValues.price * productsOnCart[index].dataValues.quantity
                 })
             }))
 

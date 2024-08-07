@@ -3,6 +3,7 @@ import UserPurchaseController from '../controllers/UserPurchaseController';
 
 const router = express.Router()
 
-router.post('/users/store/add/order', UserPurchaseController.createOrder)
+router.post('/users/store/add/order/', UserPurchaseController.addOrder)
+router.post('/users/store/add/order/cart', UserPurchaseController.addOrderOfProductsOnCart)
 
 export default router
