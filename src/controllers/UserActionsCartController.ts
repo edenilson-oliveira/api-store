@@ -119,7 +119,8 @@ class UserActionsCartController{
                 quantity: productOnCart[0].dataValues.quantity + 1
             },{
                 where: {
-                    productId
+                    productId,
+                    userId: id
                 }
             })
 
@@ -167,7 +168,8 @@ class UserActionsCartController{
                 quantity: productOnCart[0].dataValues.quantity - 1
             },{
                 where: {
-                    productId
+                    productId,
+                    userId: id
                 }
             })
 
@@ -205,7 +207,8 @@ class UserActionsCartController{
 
             await Cart.destroy({
                 where: {
-                    productId
+                    productId,
+                    userId: id
                 }
             })
 
