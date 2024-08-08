@@ -39,7 +39,7 @@ class UserPurchaseController{
             })
 
             await OrdersProducts.create({
-                purchaseId: newOrder.dataValues.id,
+                orderId: newOrder.dataValues.id,
                 productId: product[0].dataValues.id,
                 quantity: quantity,
                 price: product[0].dataValues.quantity * quantity
@@ -98,7 +98,7 @@ class UserPurchaseController{
 
             await Promise.all(products.map(async(value: Product,index: number) => {
                 await OrdersProducts.create({
-                    purchaseId: newOrder.dataValues.id,
+                    orderId: newOrder.dataValues.id,
                     productId: value.dataValues.id,
                     quantity: productsOnCart[index].dataValues.quantity,
                     price: value.dataValues.price * productsOnCart[index].dataValues.quantity
@@ -108,6 +108,49 @@ class UserPurchaseController{
 
             res.status(200).end()
 
+        }
+        catch{
+            res.status(500).json({message: 'Internal server error'})
+        }
+    }
+
+    public async removeOrder(req: Request,res: Response){
+        try{
+            const verifyToken = verifyTokenUser.execute(req,res)
+            const id = verifyToken.userId || 0
+            
+            if(!verifyToken.auth){
+                return
+            }
+
+            const orderId = req.params.id
+
+            if(!Number(orderId)){
+                return res.status(400).json({message: 'Error, orderId is not valid'})
+            }
+
+            const getOrder = await Orders.findAll({
+                where: {
+                    id: orderId,
+                    status: 'pending'
+                }
+            })
+
+            if(!getOrder.length){
+                return res.status(404).json({message: 'Order not found'})
+            }
+
+            await Promise.all([Orders.destroy({
+                where: {
+                    id: orderId
+                }
+            }), OrdersProducts.destroy({
+                where: {
+                    orderId
+                }
+            })])
+
+            res.status(200).end()
         }
         catch{
             res.status(500).json({message: 'Internal server error'})
