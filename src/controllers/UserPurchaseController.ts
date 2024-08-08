@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { Op } from 'sequelize'
 import verifyTokenUser from '../authentication/VerifyToken';
 import Cart from '../database/models/cart';
 import Orders from '../database/models/orders';
@@ -151,6 +152,52 @@ class UserPurchaseController{
             })])
 
             res.status(200).end()
+        }
+        catch{
+            res.status(500).json({message: 'Internal server error'})
+        }
+    }
+
+    public async getOrders(req: Request,res: Response){
+        try{
+            const verifyToken = verifyTokenUser.execute(req,res)
+            const id = verifyToken.userId || 0
+            
+            if(!verifyToken.auth){
+                return
+            }
+
+            const limit = Number(req.query.limit) < 10 ? Number(req.query.limit) : 10
+            const page = Number(req.query.page) || 1
+            const orderId = Number(req.query.orderId) || 0
+            const status = req.query.status
+
+            console.log(status?.toString() === 'pending' || status === 'finish')
+            
+            if(status !== 'pending' && status !== 'finish'){
+                return res.status(400).json({message: 'Error, status param must be "pending" or "finish"'})
+            }
+
+            console.log(orderId ? orderId : { [Op.gt]: 0 })
+            const getOrder = await Orders.findAll({
+                where: {
+                    id: orderId ? orderId : { [Op.gt]: 0 },
+                    userId: id,
+                    status
+                }
+            })
+
+            if(!getOrder.length){
+                return res.status(404).json({message: 'Order not Found'})
+            }
+
+            const getOrdersProducts = await OrdersProducts.findAll({
+                where: {
+                    orderId
+                }
+            })
+
+            res.status(200).json({getOrdersProducts})
         }
         catch{
             res.status(500).json({message: 'Internal server error'})
