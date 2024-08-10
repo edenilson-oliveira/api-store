@@ -124,6 +124,24 @@ class ProductSellerActionsController{
         return res.status(400).json({message: 'Product id is not valid'})
       }
 
+      const sellerId = await Seller.findAll({
+        attributes: ['id'],
+        where: {
+          userId: id
+        }
+      })
+
+      const productCount = await Product.count({
+        where: {
+          id: productId,
+          sellerId: sellerId[0].dataValues.id
+        }
+      })
+      
+      if(!productCount){
+        return res.status(404).json({message: 'Product not found'})
+      }
+
       const [products,imagesOfProducts] = await Promise.all([Product.findAll({
         where: {
           id: productId
@@ -295,7 +313,7 @@ class ProductSellerActionsController{
       
       const productOnDatabase = await Product.findAll({
         where: {
-          id: productId
+          id: productId,
         }
       })
 
@@ -332,6 +350,14 @@ class ProductSellerActionsController{
       if(validate){
         return res.status(400).json({message: validate})
       }
+
+      const sellerId = await Seller.findAll({
+        attributes: ['id'],
+        where: {
+          userId: id
+        }
+      })
+      
       
       await Product.update({
         name: productActual.name,
@@ -342,7 +368,8 @@ class ProductSellerActionsController{
       },
       {
         where: {
-          id: productId
+          id: productId,
+          sellerId: sellerId[0].dataValues.id
         }
       })
       
@@ -379,13 +406,25 @@ class ProductSellerActionsController{
       
       const files = JSON.parse(filesImagesPoducts)
 
-      const imagesOfProduct = await ImageProducts.findAll({
+      const sellerId = await Seller.findAll({
+        attributes: ['id'],
+        where: {
+          userId: id
+        }
+      })
+
+      const [productCount,imagesOfProduct] = await Promise.all([Product.count({
+        where: {
+          id: productId,
+          sellerId: sellerId[0].dataValues.id
+        }
+      }),ImageProducts.findAll({
         where:{
           productId
         }
-      })
+      })])
         
-      if(!imagesOfProduct.length){
+      if(!productCount){
         return res.status(404).json({message: 'Product not found'})
       }
 
@@ -447,22 +486,23 @@ class ProductSellerActionsController{
         }
       }),cloudinary.searchImage(publicId)])
 
-
-      if(!imagePublicIdOnDatabase[0]){
-        if(imagePublicIdOnCloudinary.resources[0]){
-          await cloudinary.deleteImage(imagePublicIdOnCloudinary.resources[0].public_id)
-          return res.status(200).json({message: 'Image not found on database but found and deleted on cloudinary'})
+      const sellerId = await Seller.findAll({
+        attributes: ['id'],
+        where: {
+          userId: id
         }
-        return res.status(404).json({message: 'Image not found'})
-      }
+      })
 
-      if(!imagePublicIdOnCloudinary.resources[0] && imagePublicIdOnDatabase[0]){
-        await ImageProducts.destroy({
-          where: {
-            filename: publicId
-          }
-        })
-        return res.status(200).json({message: 'Image not found on cloudinary but found and deleted on database'})
+      const productCount = await Product.count({
+        where: {
+          id: imagePublicIdOnDatabase.length ? imagePublicIdOnDatabase[0].dataValues.productId : 0,
+          sellerId: sellerId[0].dataValues.id
+        }
+      })
+
+
+      if(!productCount){
+        return res.status(404).json({message: 'Image not found'})
       }
 
       const [deleteImageOnDatabase,deleteImageOnCloudinary] = await Promise.all([ImageProducts.destroy({
@@ -502,6 +542,24 @@ class ProductSellerActionsController{
         return res.status(400).json({message: 'Product id is not valid'})
       }
 
+      const sellerId = await Seller.findAll({
+        attributes: ['id'],
+        where: {
+          userId: id
+        }
+      })
+
+      const productCount = await Product.count({
+        where: {
+          id: productId,
+          sellerId: sellerId[0].dataValues.id
+        }
+      })
+      
+      if(!productCount){
+        return res.status(404).json({message: 'Product not found'})
+      }
+
       const [deleteInfoProduct,deleteImageProduct,imagesOfProduct] = await Promise.all([
         Product.destroy({
           where: {
@@ -529,11 +587,7 @@ class ProductSellerActionsController{
         return cloudinary.deleteImage(value.resources[0].public_id)
       }))
 
-      
-      if(!deleteInfoProduct){
-        return res.status(404).json({message: 'Product not found'})
-      }
-
+    
       res.status(204).end()
     }
     catch{
