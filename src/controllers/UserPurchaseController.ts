@@ -133,7 +133,8 @@ class UserPurchaseController{
             const getOrder = await Orders.findAll({
                 where: {
                     id: orderId,
-                    status: 'pending'
+                    status: 'pending',
+                    userId: id
                 }
             })
 
@@ -171,15 +172,13 @@ class UserPurchaseController{
             const page = Number(req.query.page) || 1
             const orderId = Number(req.query.orderId) || 0
             const status = req.query.status
-
-            console.log(status?.toString() === 'pending' || status === 'finish')
             
             if(status !== 'pending' && status !== 'finish'){
                 return res.status(400).json({message: 'Error, status param must be "pending" or "finish"'})
             }
 
-            console.log(orderId ? orderId : { [Op.gt]: 0 })
             const getOrder = await Orders.findAll({
+                attributes: ['id'],
                 where: {
                     id: orderId ? orderId : { [Op.gt]: 0 },
                     userId: id,
@@ -191,13 +190,31 @@ class UserPurchaseController{
                 return res.status(404).json({message: 'Order not Found'})
             }
 
+            const returnOrdersId = getOrder.map((value: Orders) => {
+                return value.dataValues.id
+            })
+
             const getOrdersProducts = await OrdersProducts.findAll({
                 where: {
-                    orderId
+                    orderId: { [Op.or]: returnOrdersId }
+                },
+                offset: page * limit - limit,
+                limit
+            })
+
+            const ordersProductsCount = await OrdersProducts.count({
+                where: {
+                    orderId: { [Op.or]: returnOrdersId }
                 }
             })
 
-            res.status(200).json({getOrdersProducts})
+            const pagination = {
+                totalResults: getOrdersProducts.length,
+                ordersProductsCount
+            }
+
+
+            res.status(200).json({getOrdersProducts,pagination})
         }
         catch{
             res.status(500).json({message: 'Internal server error'})
