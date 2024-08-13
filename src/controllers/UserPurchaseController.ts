@@ -220,6 +220,38 @@ class UserPurchaseController{
             res.status(500).json({message: 'Internal server error'})
         }
     }
+
+    public async finalizeOrder(req: Request,res: Response){
+        try{
+            const verifyToken = verifyTokenUser.execute(req,res)
+            const id = verifyToken.userId || 0
+            
+            if(!verifyToken.auth){
+                return
+            }
+
+            const orderId = Number(req.params.id)
+
+            const getOrder = await Orders.findAll({
+                attributes: ['id'],
+                where: {
+                    id: orderId,
+                    userId: id,
+                    status: 'pending'
+                }
+            })
+            
+            if(!getOrder.length){
+                return res.status(404).json({message: 'Order not found'})
+            }
+
+            res.status(200).end()
+
+        }
+        catch{
+            res.status(500).json({message: 'Internal server error'})
+        }
+    }
 }
 
 export default new UserPurchaseController
