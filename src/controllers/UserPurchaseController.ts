@@ -220,7 +220,7 @@ class UserPurchaseController{
         }
     }
 
-    public async removeProductOnOrder(req: Request,res: Response){
+    public async removeProductInTheOrder(req: Request,res: Response){
         try{
             const verifyToken = verifyTokenUser.execute(req,res)
             const id = verifyToken.userId || 0
@@ -240,13 +240,33 @@ class UserPurchaseController{
 
             const getOrder = await Orders.findAll({
                 where: {
-                    id: getOrderProduct ? getOrderProduct[0].dataValues.orderId : 0,
+                    id: getOrderProduct.length ? getOrderProduct[0].dataValues.orderId : 0,
                     userId: id
                 }
             })
 
             if(!getOrder.length){
                 return res.status(404).json({message: 'Order id of product not found'})
+            }
+
+            await OrdersProducts.destroy({
+                where: {
+                    id: orderProductId
+                }
+            })
+
+            const countOrdersProducts = await OrdersProducts.count({
+                where: {
+                    orderId: getOrder[0].dataValues.id
+                }
+            })
+
+            if(countOrdersProducts === 0){
+                await Orders.destroy({
+                    where: {
+                        id: getOrder[0].dataValues.id
+                    }
+                })
             }
 
             res.status(200).end()

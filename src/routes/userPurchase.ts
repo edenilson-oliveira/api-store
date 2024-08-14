@@ -8,6 +8,6 @@ router.post('/users/store/add/order/cart', UserPurchaseController.addOrderOfProd
 router.delete('/users/store/delete/order/:id', UserPurchaseController.removeOrder)
 router.get('/users/store/get/orders',UserPurchaseController.getOrders)
 router.post('/users/store/finalize/order/:id',UserPurchaseController.finalizeOrder)
-router.delete('/users/store/order/delete/product/:id', UserPurchaseController.removeProductOnOrder)
+router.delete('/users/store/order/delete/product/:id', UserPurchaseController.removeProductInTheOrder)
 
 export default router
