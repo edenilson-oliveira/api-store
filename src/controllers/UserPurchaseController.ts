@@ -50,8 +50,7 @@ class UserPurchaseController{
             res.status(200).end()
 
         }
-        catch(err){
-            console.log(err)
+        catch{
             res.status(500).json({message: 'Internal server error'})
         }
     }
@@ -220,6 +219,43 @@ class UserPurchaseController{
             res.status(500).json({message: 'Internal server error'})
         }
     }
+
+    public async removeProductOnOrder(req: Request,res: Response){
+        try{
+            const verifyToken = verifyTokenUser.execute(req,res)
+            const id = verifyToken.userId || 0
+            
+            if(!verifyToken.auth){
+                return
+            }
+
+            const orderProductId = req.params.id
+
+            const getOrderProduct = await OrdersProducts.findAll({
+                attributes: ['orderId'],
+                where: {
+                    id: orderProductId
+                }
+            })
+
+            const getOrder = await Orders.findAll({
+                where: {
+                    id: getOrderProduct ? getOrderProduct[0].dataValues.orderId : 0,
+                    userId: id
+                }
+            })
+
+            if(!getOrder.length){
+                return res.status(404).json({message: 'Order id of product not found'})
+            }
+
+            res.status(200).end()
+        }
+        catch{
+            res.status(500).json({message: 'Internal server error'})
+        }
+    }
+
 
     public async finalizeOrder(req: Request,res: Response){
         try{
