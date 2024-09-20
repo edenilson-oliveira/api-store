@@ -32,6 +32,7 @@ class UserAccountController{
       
       if(verifyToken.auth){
         const user = await User.findAll({
+          attributes: ['firstName','lastName','email','createdAt','updatedAt'],
           where:{
             id
           } 
